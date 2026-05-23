@@ -37,6 +37,7 @@ body {
 
 #app {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh;
   max-width: 640px;
@@ -54,69 +55,50 @@ body {
   position: relative;
 }
 
-.stack {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+/* ── Card Stack ── */
+
+.card-stack {
+  flex: 1;
   position: relative;
+  display: flex;
+  width: 100%;
 }
 
-/* ── Card Background (ghost) ── */
-
-.card-bg {
+.card {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
-  z-index: 0;
-}
-
-#bgText {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 400;
-  line-height: 1.55;
-  text-align: center;
-  text-wrap: pretty;
-  color: rgba(255, 255, 255, 0.04);
-  max-width: 80%;
-  transition: color 0.15s ease;
-}
-
-.card-bg.reveal #bgText {
-  color: rgba(255, 255, 255, 0.12);
-}
-
-/* ── Card ── */
-
-.card {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  position: relative;
-  z-index: 1;
   background: var(--bg);
+}
+
+.card--front {
+  z-index: 2;
   will-change: transform;
 }
 
-.card-content {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+.card--back {
+  z-index: 1;
 }
 
-#question {
+.card-content {
+  width: 100%;
+  padding: 20px;
+  text-align: center;
+}
+
+#frontQuestion,
+#backQuestion {
   font-family: var(--font-display);
   font-size: 1.5rem;
   font-weight: 400;
   line-height: 1.55;
-  text-align: center;
   text-wrap: pretty;
-  max-width: 100%;
+}
+
+#backQuestion {
+  color: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Nav ── */
@@ -214,7 +196,11 @@ body {
     padding: 20px 16px;
   }
 
-  #question {
+  #frontQuestion {
+    font-size: 1.75rem;
+  }
+
+  #backQuestion {
     font-size: 1.75rem;
   }
 
@@ -226,7 +212,8 @@ body {
 }
 
 @media (min-width: 1024px) {
-  #question {
+  #frontQuestion,
+  #backQuestion {
     font-size: 2rem;
   }
 
@@ -236,7 +223,8 @@ body {
 }
 
 @media (max-height: 640px) {
-  #question {
+  #frontQuestion,
+  #backQuestion {
     font-size: 1.2rem;
   }
 

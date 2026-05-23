@@ -4,11 +4,12 @@
   var all = [];
   var history = [];
   var current = -1;
+  var busy = false;
 
-  var questionEl = document.getElementById('question');
-  var bgTextEl = document.getElementById('bgText');
-  var cardEl = document.getElementById('card');
-  var cardBg = document.getElementById('cardBg');
+  var frontEl = document.getElementById('cardFront');
+  var backEl = document.getElementById('cardBack');
+  var frontQ = document.getElementById('frontQuestion');
+  var backQ = document.getElementById('backQuestion');
   var prevBtn = document.getElementById('prevBtn');
   var nextBtn = document.getElementById('nextBtn');
   var shuffleBtn = document.getElementById('shuffleBtn');
@@ -21,120 +22,134 @@
     .then(function (r) { return r.json(); })
     .then(function (data) {
       data.forEach(function (cat) {
-        cat.perguntas.forEach(function (q) {
-          all.push(q);
-        });
+        cat.perguntas.forEach(function (q) { all.push(q); });
       });
       shuffleAll();
       showAt(0);
     })
-    .catch(function () {
-      questionEl.textContent = 'Erro ao carregar perguntas.';
-    });
+    .catch(function () { frontQ.textContent = 'Erro ao carregar perguntas.'; });
 
   function shuffleAll() {
     for (var i = all.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
-      var tmp = all[i];
-      all[i] = all[j];
-      all[j] = tmp;
+      var tmp = all[i]; all[i] = all[j]; all[j] = tmp;
     }
   }
 
   function showAt(index) {
-    if (index < 0 || index >= all.length) return;
     current = index;
-    questionEl.textContent = all[current];
-    updateBg();
+    frontQ.textContent = all[current];
+    backQ.textContent = current < all.length - 1 ? all[current + 1] : all[current - 1];
+    resetCards();
   }
 
-  function next() {
+  function resetCards() {
+    frontEl.style.transition = '';
+    frontEl.style.transform = '';
+    frontEl.style.opacity = '';
+    backEl.style.transition = '';
+    backEl.style.transform = '';
+    backEl.style.opacity = '';
+  }
+
+  function updateBack() {
     if (current < all.length - 1) {
-      history.push(current);
-      slideTo(current + 1, -100);
-    } else {
-      toast('Última pergunta');
+      backQ.textContent = all[current + 1];
+    } else if (current > 0) {
+      backQ.textContent = all[current - 1];
     }
+    backEl.style.transition = 'none';
+    backEl.style.transform = '';
+    backEl.style.opacity = '';
   }
 
-  function prev() {
+  function goNext() {
+    if (busy) return;
+    if (current >= all.length - 1) { toast('Última pergunta'); return; }
+    busy = true;
+    history.push(current);
+    slideTo(current + 1, -1);
+  }
+
+  function goPrev() {
+    if (busy) return;
+    var idx;
     if (history.length > 0) {
-      var idx = history.pop();
-      slideTo(idx, 100);
+      idx = history.pop();
     } else if (current > 0) {
-      slideTo(current - 1, 100);
+      idx = current - 1;
     } else {
       toast('Primeira pergunta');
+      return;
     }
+    busy = true;
+    backQ.textContent = all[idx];
+    backEl.style.transition = '';
+    backEl.style.transform = '';
+    backEl.style.opacity = '';
+    slideTo(idx, 1);
   }
 
-  function random() {
-    if (all.length < 2) return;
+  function goRandom() {
+    if (busy || all.length < 2) return;
     var idx;
-    do {
-      idx = Math.floor(Math.random() * all.length);
-    } while (idx === current);
+    do { idx = Math.floor(Math.random() * all.length); } while (idx === current);
     if (current >= 0) history.push(current);
-    slideTo(idx, idx > current ? -100 : 100);
+    busy = true;
+    backQ.textContent = all[idx];
+    backEl.style.transition = '';
+    backEl.style.transform = '';
+    backEl.style.opacity = '';
+    slideTo(idx, idx > current ? -1 : 1);
   }
 
-  function slideTo(index, outDir) {
-    var inDir = outDir > 0 ? -40 : 40;
+  function slideTo(target, dir) {
+    var outX = dir * -100;
+    var inX = dir * 100;
 
-    cardEl.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-    cardEl.style.transform = 'translateX(' + outDir + '%)';
-    cardEl.style.opacity = '0';
+    frontEl.style.transition = 'transform 0.3s ease, opacity 0.25s ease';
+    frontEl.style.transform = 'translateX(' + outX + '%)';
+    frontEl.style.opacity = '0';
 
     setTimeout(function () {
-      current = index;
-      questionEl.textContent = all[current];
-      updateBg();
+      current = target;
+      frontQ.textContent = all[current];
+      frontEl.style.transition = 'none';
+      frontEl.style.transform = 'translateX(' + inX + '%)';
+      frontEl.style.opacity = '0';
+      frontEl.offsetHeight;
 
-      cardEl.style.transition = 'none';
-      cardEl.style.transform = 'translateX(' + inDir + '%)';
-      cardEl.style.opacity = '0';
-      cardEl.offsetHeight;
+      frontEl.style.transition = 'transform 0.35s ease, opacity 0.3s ease';
+      frontEl.style.transform = 'translateX(0%)';
+      frontEl.style.opacity = '1';
 
-      cardEl.style.transition = 'transform 0.35s ease, opacity 0.35s ease';
-      cardEl.style.transform = 'translateX(0%)';
-      cardEl.style.opacity = '1';
+      updateBack();
 
       setTimeout(function () {
-        cardEl.style.transition = '';
-        cardEl.style.transform = '';
-        cardEl.style.opacity = '';
+        frontEl.style.transition = '';
+        frontEl.style.transform = '';
+        frontEl.style.opacity = '';
+        busy = false;
       }, 380);
     }, 320);
-  }
-
-  function updateBg() {
-    if (current < all.length - 1) {
-      bgTextEl.textContent = all[current + 1];
-    } else if (current > 0) {
-      bgTextEl.textContent = all[current - 1];
-    }
   }
 
   function toast(msg) {
     toastEl.textContent = msg;
     toastEl.classList.add('show');
     clearTimeout(toastEl._timeout);
-    toastEl._timeout = setTimeout(function () {
-      toastEl.classList.remove('show');
-    }, 1400);
+    toastEl._timeout = setTimeout(function () { toastEl.classList.remove('show'); }, 1400);
   }
 
   // ── Drag ──
 
   function isOnButton(el) {
-    while (el) {
-      if (el.tagName === 'BUTTON') return true;
-      el = el.parentElement;
-    }
+    while (el) { if (el.tagName === 'BUTTON') return true; el = el.parentElement; }
     return false;
   }
 
   function dragStart(x, y, target) {
+    if (busy) return;
     drag.onBtn = isOnButton(target);
     if (drag.onBtn) return;
     drag.active = true;
@@ -142,112 +157,109 @@
     drag.startY = y;
     drag.dx = 0;
     drag.moved = false;
-    cardEl.style.transition = 'none';
-    cardBg.classList.remove('reveal');
+
+    frontEl.style.transition = 'none';
+
+    if (current < all.length - 1) {
+      backQ.textContent = all[current + 1];
+    }
+    backEl.style.transition = 'none';
+    backEl.style.transform = '';
+    backEl.style.opacity = '';
   }
 
   function dragMove(x, y) {
     if (!drag.active) return;
     var dx = x - drag.startX;
     var dy = y - drag.startY;
-
-    if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+    if (!drag.moved && Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
     drag.moved = true;
     drag.dx = dx;
 
-    var canPrev = current > 0;
-    var canNext = current < all.length - 1;
-
     if (Math.abs(dx) > Math.abs(dy) * 0.3) {
-      cardEl.style.transform = 'translateX(' + dx + 'px)';
-
+      frontEl.style.transform = 'translateX(' + dx + 'px)';
       var progress = Math.min(Math.abs(dx) / THRESHOLD, 1);
-      cardEl.style.opacity = 1 - progress * 0.5;
-
-      if (dx < 0 && canNext) {
-        bgTextEl.textContent = all[current + 1];
-        cardBg.classList.add('reveal');
-      } else if (dx > 0 && canPrev) {
-        bgTextEl.textContent = all[current - 1];
-        cardBg.classList.add('reveal');
-      } else {
-        cardBg.classList.remove('reveal');
-      }
+      frontEl.style.opacity = 1 - progress * 0.5;
     }
   }
 
   function dragEnd() {
     if (!drag.active) return;
     drag.active = false;
-    cardBg.classList.remove('reveal');
-
-    if (!drag.moved) {
-      next();
-      return;
-    }
+    if (!drag.moved) { goNext(); return; }
 
     var dx = drag.dx;
-    var absDx = Math.abs(dx);
-
-    if (absDx >= THRESHOLD) {
-      var dir = dx < 0 ? -1 : 1;
-      if (dir < 0 && current < all.length - 1) {
+    if (Math.abs(dx) >= THRESHOLD) {
+      if (dx < 0 && current < all.length - 1) {
+        busy = true;
         history.push(current);
-        finishSlide(dir, function () {
+        dragFinish(-1, function () {
           current++;
-          questionEl.textContent = all[current];
-          updateBg();
+          frontQ.textContent = all[current];
+          dragReset(-1);
         });
-      } else if (dir > 0 && current > 0) {
-        finishSlide(dir, function () {
-          if (history.length > 0) {
-            current = history.pop();
-          } else {
-            current--;
-          }
-          questionEl.textContent = all[current];
-          updateBg();
+      } else if (dx > 0) {
+        var idx;
+        if (history.length > 0) {
+          idx = history.pop();
+        } else if (current > 0) {
+          idx = current - 1;
+        } else {
+          dragSnap();
+          return;
+        }
+        busy = true;
+        backQ.textContent = all[idx];
+        backEl.style.transition = '';
+        backEl.style.transform = '';
+        backEl.style.opacity = '';
+        dragFinish(1, function () {
+          current = idx;
+          frontQ.textContent = all[current];
+          dragReset(1);
         });
       } else {
-        snapBack();
+        dragSnap();
       }
     } else {
-      snapBack();
+      dragSnap();
     }
   }
 
-  function finishSlide(dir, updateFn) {
+  function dragFinish(dir, cb) {
     var outX = dir === -1 ? '-100%' : '100%';
-    cardEl.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
-    cardEl.style.transform = 'translateX(' + outX + ')';
-    cardEl.style.opacity = '0';
-
-    setTimeout(function () {
-      updateFn();
-      var inX = dir === -1 ? '40px' : '-40px';
-      cardEl.style.transition = 'none';
-      cardEl.style.transform = 'translateX(' + inX + ')';
-      cardEl.style.opacity = '0';
-      cardEl.offsetHeight;
-      cardEl.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-      cardEl.style.transform = 'translateX(0px)';
-      cardEl.style.opacity = '1';
-      setTimeout(function () {
-        cardEl.style.transition = '';
-        cardEl.style.transform = '';
-        cardEl.style.opacity = '';
-      }, 350);
-    }, 260);
+    frontEl.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+    frontEl.style.transform = 'translateX(' + outX + ')';
+    frontEl.style.opacity = '0';
+    setTimeout(cb, 260);
   }
 
-  function snapBack() {
-    cardEl.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-    cardEl.style.transform = 'translateX(0px)';
-    cardEl.style.opacity = '1';
+  function dragReset(dir) {
+    var inX = dir === -1 ? '40px' : '-40px';
+    frontEl.style.transition = 'none';
+    frontEl.style.transform = 'translateX(' + inX + ')';
+    frontEl.style.opacity = '0';
+    frontEl.offsetHeight;
+    frontEl.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    frontEl.style.transform = 'translateX(0px)';
+    frontEl.style.opacity = '1';
+    updateBack();
     setTimeout(function () {
-      cardEl.style.transition = '';
-      cardEl.style.transform = '';
-      cardEl.style.opacity = '';
+      frontEl.style.transition = '';
+      frontEl.style.transform = '';
+      frontEl.style.opacity = '';
+      busy = false;
+    }, 350);
+  }
+
+  function dragSnap() {
+    frontEl.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    frontEl.style.transform = 'translateX(0px)';
+    frontEl.style.opacity = '1';
+    setTimeout(function () {
+      frontEl.style.transition = '';
+      frontEl.style.transform = '';
+      frontEl.style.opacity = '';
     }, 350);
   }
 
@@ -257,42 +269,30 @@
     var t = e.changedTouches[0];
     dragStart(t.clientX, t.clientY, e.target);
   }, { passive: true });
-
   document.addEventListener('touchmove', function (e) {
     var t = e.changedTouches[0];
     dragMove(t.clientX, t.clientY);
   }, { passive: true });
-
-  document.addEventListener('touchend', function () {
-    dragEnd();
-  }, { passive: true });
+  document.addEventListener('touchend', function () { dragEnd(); }, { passive: true });
 
   // ── Mouse ──
 
-  document.addEventListener('mousedown', function (e) {
-    dragStart(e.clientX, e.clientY, e.target);
-  });
-
-  document.addEventListener('mousemove', function (e) {
-    dragMove(e.clientX, e.clientY);
-  });
-
-  document.addEventListener('mouseup', function () {
-    dragEnd();
-  });
+  document.addEventListener('mousedown', function (e) { dragStart(e.clientX, e.clientY, e.target); });
+  document.addEventListener('mousemove', function (e) { dragMove(e.clientX, e.clientY); });
+  document.addEventListener('mouseup', function () { dragEnd(); });
 
   // ── Buttons ──
 
-  prevBtn.addEventListener('click', function (e) { e.stopPropagation(); prev(); });
-  nextBtn.addEventListener('click', function (e) { e.stopPropagation(); next(); });
-  shuffleBtn.addEventListener('click', function (e) { e.stopPropagation(); random(); });
+  prevBtn.addEventListener('click', function (e) { e.stopPropagation(); goPrev(); });
+  nextBtn.addEventListener('click', function (e) { e.stopPropagation(); goNext(); });
+  shuffleBtn.addEventListener('click', function (e) { e.stopPropagation(); goRandom(); });
 
   // ── Keyboard ──
 
   document.addEventListener('keydown', function (e) {
-    if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') prev();
-    else if (e.code === 'ArrowRight' || e.code === 'ArrowDown') next();
-    else if (e.code === 'Space') { e.preventDefault(); random(); }
+    if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') goPrev();
+    else if (e.code === 'ArrowRight' || e.code === 'ArrowDown') goNext();
+    else if (e.code === 'Space') { e.preventDefault(); goRandom(); }
   });
 
   // ── PWA ──

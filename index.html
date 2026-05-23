@@ -19,38 +19,41 @@
 <body>
   <div id="app">
     <div class="swipe-area" id="swipeArea">
-      <div class="stack">
-        <div class="card-bg" id="cardBg">
-          <p id="bgText"></p>
-        </div>
-        <div class="card" id="card">
+      <div class="card-stack" id="cardStack">
+        <div class="card" id="cardBack">
           <div class="card-content">
-            <p id="question"></p>
+            <p id="backQuestion"></p>
           </div>
-          <nav class="nav">
-            <button class="nav-btn" id="prevBtn" aria-label="Anterior">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-            </button>
-            <button class="nav-btn nav-btn--shuffle" id="shuffleBtn" aria-label="Embaralhar">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="16 3 21 3 21 8"></polyline>
-                <line x1="4" y1="20" x2="21" y2="3"></line>
-                <polyline points="21 16 21 21 16 21"></polyline>
-                <line x1="15" y1="15" x2="21" y2="21"></line>
-                <line x1="4" y1="4" x2="9" y2="9"></line>
-              </svg>
-            </button>
-            <button class="nav-btn" id="nextBtn" aria-label="Próxima">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </button>
-          </nav>
+        </div>
+        <div class="card" id="cardFront">
+          <div class="card-content">
+            <p id="frontQuestion"></p>
+          </div>
         </div>
       </div>
     </div>
+
+    <nav class="nav">
+      <button class="nav-btn" id="prevBtn" aria-label="Anterior">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <button class="nav-btn nav-btn--shuffle" id="shuffleBtn" aria-label="Embaralhar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 3 21 3 21 8"></polyline>
+          <line x1="4" y1="20" x2="21" y2="3"></line>
+          <polyline points="21 16 21 21 16 21"></polyline>
+          <line x1="15" y1="15" x2="21" y2="21"></line>
+          <line x1="4" y1="4" x2="9" y2="9"></line>
+        </svg>
+      </button>
+      <button class="nav-btn" id="nextBtn" aria-label="Próxima">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </nav>
   </div>
 
   <div class="toast" id="toast"></div>
