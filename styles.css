@@ -51,6 +51,42 @@ body {
   flex: 1;
   display: flex;
   overflow: hidden;
+  position: relative;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+}
+
+/* ── Card Background (ghost) ── */
+
+.card-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#bgText {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.55;
+  text-align: center;
+  text-wrap: pretty;
+  color: rgba(255, 255, 255, 0.04);
+  max-width: 80%;
+  transition: color 0.15s ease;
+}
+
+.card-bg.reveal #bgText {
+  color: rgba(255, 255, 255, 0.12);
 }
 
 /* ── Card ── */
@@ -59,17 +95,10 @@ body {
   display: flex;
   flex-direction: column;
   width: 100%;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.card.before {
-  opacity: 0;
-  transform: translateX(-40px);
-}
-
-.card.after {
-  opacity: 0;
-  transform: translateX(40px);
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
+  will-change: transform;
 }
 
 .card-content {
@@ -162,7 +191,7 @@ body {
   transform: translateX(-50%) translateY(0);
 }
 
-/* ── Desktop: carta outline ocupando altura toda ── */
+/* ── Desktop ── */
 
 @media (min-width: 768px) {
   body {
@@ -205,8 +234,6 @@ body {
     padding: 32px;
   }
 }
-
-/* ── Telas baixas ── */
 
 @media (max-height: 640px) {
   #question {

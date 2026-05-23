@@ -4,14 +4,18 @@
   var all = [];
   var history = [];
   var current = -1;
-  var animating = false;
 
   var questionEl = document.getElementById('question');
+  var bgTextEl = document.getElementById('bgText');
   var cardEl = document.getElementById('card');
+  var cardBg = document.getElementById('cardBg');
   var prevBtn = document.getElementById('prevBtn');
   var nextBtn = document.getElementById('nextBtn');
   var shuffleBtn = document.getElementById('shuffleBtn');
   var toastEl = document.getElementById('toast');
+
+  var THRESHOLD = 80;
+  var drag = { active: false, startX: 0, startY: 0, dx: 0, moved: false, onBtn: false };
 
   fetch('questions.json')
     .then(function (r) { return r.json(); })
@@ -37,31 +41,17 @@
     }
   }
 
-  function showAt(index, dir) {
-    if (animating) return;
+  function showAt(index) {
     if (index < 0 || index >= all.length) return;
-    if (index === current) return;
-
-    animating = true;
     current = index;
-
-    if (dir) {
-      cardEl.classList.add(dir === 1 ? 'after' : 'before');
-      setTimeout(function () {
-        questionEl.textContent = all[current];
-        cardEl.classList.remove('before', 'after');
-        animating = false;
-      }, 180);
-    } else {
-      questionEl.textContent = all[current];
-      animating = false;
-    }
+    questionEl.textContent = all[current];
+    updateBg();
   }
 
   function next() {
     if (current < all.length - 1) {
       history.push(current);
-      showAt(current + 1, 1);
+      slideTo(current + 1, -100);
     } else {
       toast('Última pergunta');
     }
@@ -70,9 +60,9 @@
   function prev() {
     if (history.length > 0) {
       var idx = history.pop();
-      showAt(idx, -1);
+      slideTo(idx, 100);
     } else if (current > 0) {
-      showAt(current - 1, -1);
+      slideTo(current - 1, 100);
     } else {
       toast('Primeira pergunta');
     }
@@ -85,7 +75,44 @@
       idx = Math.floor(Math.random() * all.length);
     } while (idx === current);
     if (current >= 0) history.push(current);
-    showAt(idx, idx > current ? 1 : -1);
+    slideTo(idx, idx > current ? -100 : 100);
+  }
+
+  function slideTo(index, outDir) {
+    var inDir = outDir > 0 ? -40 : 40;
+
+    cardEl.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    cardEl.style.transform = 'translateX(' + outDir + '%)';
+    cardEl.style.opacity = '0';
+
+    setTimeout(function () {
+      current = index;
+      questionEl.textContent = all[current];
+      updateBg();
+
+      cardEl.style.transition = 'none';
+      cardEl.style.transform = 'translateX(' + inDir + '%)';
+      cardEl.style.opacity = '0';
+      cardEl.offsetHeight;
+
+      cardEl.style.transition = 'transform 0.35s ease, opacity 0.35s ease';
+      cardEl.style.transform = 'translateX(0%)';
+      cardEl.style.opacity = '1';
+
+      setTimeout(function () {
+        cardEl.style.transition = '';
+        cardEl.style.transform = '';
+        cardEl.style.opacity = '';
+      }, 380);
+    }, 320);
+  }
+
+  function updateBg() {
+    if (current < all.length - 1) {
+      bgTextEl.textContent = all[current + 1];
+    } else if (current > 0) {
+      bgTextEl.textContent = all[current - 1];
+    }
   }
 
   function toast(msg) {
@@ -97,51 +124,168 @@
     }, 1400);
   }
 
-  // ── Buttons ──
+  // ── Drag ──
 
-  prevBtn.addEventListener('click', prev);
-  nextBtn.addEventListener('click', next);
-  shuffleBtn.addEventListener('click', random);
+  function isOnButton(el) {
+    while (el) {
+      if (el.tagName === 'BUTTON') return true;
+      el = el.parentElement;
+    }
+    return false;
+  }
 
-  // ── Swipe ──
+  function dragStart(x, y, target) {
+    drag.onBtn = isOnButton(target);
+    if (drag.onBtn) return;
+    drag.active = true;
+    drag.startX = x;
+    drag.startY = y;
+    drag.dx = 0;
+    drag.moved = false;
+    cardEl.style.transition = 'none';
+    cardBg.classList.remove('reveal');
+  }
 
-  var startX = 0, startY = 0, swiping = false;
+  function dragMove(x, y) {
+    if (!drag.active) return;
+    var dx = x - drag.startX;
+    var dy = y - drag.startY;
+
+    if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+    drag.moved = true;
+    drag.dx = dx;
+
+    var canPrev = current > 0;
+    var canNext = current < all.length - 1;
+
+    if (Math.abs(dx) > Math.abs(dy) * 0.3) {
+      cardEl.style.transform = 'translateX(' + dx + 'px)';
+
+      var progress = Math.min(Math.abs(dx) / THRESHOLD, 1);
+      cardEl.style.opacity = 1 - progress * 0.5;
+
+      if (dx < 0 && canNext) {
+        bgTextEl.textContent = all[current + 1];
+        cardBg.classList.add('reveal');
+      } else if (dx > 0 && canPrev) {
+        bgTextEl.textContent = all[current - 1];
+        cardBg.classList.add('reveal');
+      } else {
+        cardBg.classList.remove('reveal');
+      }
+    }
+  }
+
+  function dragEnd() {
+    if (!drag.active) return;
+    drag.active = false;
+    cardBg.classList.remove('reveal');
+
+    if (!drag.moved) {
+      next();
+      return;
+    }
+
+    var dx = drag.dx;
+    var absDx = Math.abs(dx);
+
+    if (absDx >= THRESHOLD) {
+      var dir = dx < 0 ? -1 : 1;
+      if (dir < 0 && current < all.length - 1) {
+        history.push(current);
+        finishSlide(dir, function () {
+          current++;
+          questionEl.textContent = all[current];
+          updateBg();
+        });
+      } else if (dir > 0 && current > 0) {
+        finishSlide(dir, function () {
+          if (history.length > 0) {
+            current = history.pop();
+          } else {
+            current--;
+          }
+          questionEl.textContent = all[current];
+          updateBg();
+        });
+      } else {
+        snapBack();
+      }
+    } else {
+      snapBack();
+    }
+  }
+
+  function finishSlide(dir, updateFn) {
+    var outX = dir === -1 ? '-100%' : '100%';
+    cardEl.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+    cardEl.style.transform = 'translateX(' + outX + ')';
+    cardEl.style.opacity = '0';
+
+    setTimeout(function () {
+      updateFn();
+      var inX = dir === -1 ? '40px' : '-40px';
+      cardEl.style.transition = 'none';
+      cardEl.style.transform = 'translateX(' + inX + ')';
+      cardEl.style.opacity = '0';
+      cardEl.offsetHeight;
+      cardEl.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+      cardEl.style.transform = 'translateX(0px)';
+      cardEl.style.opacity = '1';
+      setTimeout(function () {
+        cardEl.style.transition = '';
+        cardEl.style.transform = '';
+        cardEl.style.opacity = '';
+      }, 350);
+    }, 260);
+  }
+
+  function snapBack() {
+    cardEl.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    cardEl.style.transform = 'translateX(0px)';
+    cardEl.style.opacity = '1';
+    setTimeout(function () {
+      cardEl.style.transition = '';
+      cardEl.style.transform = '';
+      cardEl.style.opacity = '';
+    }, 350);
+  }
+
+  // ── Touch ──
 
   document.addEventListener('touchstart', function (e) {
     var t = e.changedTouches[0];
-    startX = t.clientX;
-    startY = t.clientY;
-    swiping = true;
+    dragStart(t.clientX, t.clientY, e.target);
   }, { passive: true });
 
-  document.addEventListener('touchend', function (e) {
-    if (!swiping) return;
-    swiping = false;
+  document.addEventListener('touchmove', function (e) {
     var t = e.changedTouches[0];
-    var dx = t.clientX - startX;
-    var dy = t.clientY - startY;
-    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-    if (dx > 0) prev();
-    else next();
+    dragMove(t.clientX, t.clientY);
   }, { passive: true });
 
-  // ── Mouse drag ──
+  document.addEventListener('touchend', function () {
+    dragEnd();
+  }, { passive: true });
+
+  // ── Mouse ──
 
   document.addEventListener('mousedown', function (e) {
-    startX = e.clientX;
-    startY = e.clientY;
-    swiping = true;
+    dragStart(e.clientX, e.clientY, e.target);
   });
 
-  document.addEventListener('mouseup', function (e) {
-    if (!swiping) return;
-    swiping = false;
-    var dx = e.clientX - startX;
-    var dy = e.clientY - startY;
-    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-    if (dx > 0) prev();
-    else next();
+  document.addEventListener('mousemove', function (e) {
+    dragMove(e.clientX, e.clientY);
   });
+
+  document.addEventListener('mouseup', function () {
+    dragEnd();
+  });
+
+  // ── Buttons ──
+
+  prevBtn.addEventListener('click', function (e) { e.stopPropagation(); prev(); });
+  nextBtn.addEventListener('click', function (e) { e.stopPropagation(); next(); });
+  shuffleBtn.addEventListener('click', function (e) { e.stopPropagation(); random(); });
 
   // ── Keyboard ──
 
