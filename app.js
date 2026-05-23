@@ -1,41 +1,35 @@
 (function () {
   'use strict';
 
-  /* ── State ── */
+  /* ── state ── */
 
   var questions = [];
   var aboutPages = [];
   var qIndex = 0;
   var aIndex = 0;
+  var aboutMode = false;
   var busy = false;
-  var aboutOpen = false;
 
-  /* ── DOM refs ── */
+  /* ── dom ── */
 
-  var frontQ = document.getElementById('frontQuestion');
-  var backQ = document.getElementById('backQuestion');
-  var frontEl = document.getElementById('cardFront');
-  var backEl = document.getElementById('cardBack');
-  var prevBtn = document.getElementById('prevBtn');
-  var nextBtn = document.getElementById('nextBtn');
-  var shareBtn = document.getElementById('shareBtn');
-  var aboutBtn = document.getElementById('aboutBtn');
-  var installBtn = document.getElementById('installBtn');
-  var toastEl = document.getElementById('toast');
-  var overlay = document.getElementById('aboutOverlay');
-  var aboutClose = document.getElementById('aboutClose');
-  var aboutPrev = document.getElementById('aboutPrev');
-  var aboutNext = document.getElementById('aboutNext');
-  var aboutCounter = document.getElementById('aboutCounter');
-  var aboutDots = document.getElementById('aboutDots');
-  var aboutFront = document.getElementById('aboutFront');
-  var aboutBack = document.getElementById('aboutBack');
-  var aboutFrontInner = document.getElementById('aboutFrontInner');
-  var aboutBackInner = document.getElementById('aboutBackInner');
+  var $ = function (id) { return document.getElementById(id); };
 
-  var deferredPrompt = null;
+  var frontInner = $('frontInner');
+  var backInner = $('backInner');
+  var frontCard = $('cardFront');
+  var backCard = $('cardBack');
+  var questionText = $('questionText');
+  var aboutContent = $('aboutContent');
+  var aboutDots = $('aboutDots');
+  var prevBtn = $('prevBtn');
+  var nextBtn = $('nextBtn');
+  var shareBtn = $('shareBtn');
+  var aboutBtn = $('aboutBtn');
+  var aboutCloseBtn = $('aboutCloseBtn');
+  var installBtn = $('installBtn');
+  var toastEl = $('toast');
 
-  /* ── Load ── */
+  /* ── load ── */
 
   Promise.all([
     fetch('questions.json').then(function (r) { return r.json(); }),
@@ -46,37 +40,25 @@
     });
     aboutPages = data[1].pages;
     shuffleAll();
+    updateBackQ();
     showQ(0);
-    renderAboutDots();
+    renderDots();
     if (!localStorage.getItem('naroda_about_seen')) {
-      openAbout();
+      toggleAbout();
       localStorage.setItem('naroda_about_seen', '1');
     }
   }).catch(function () {
-    frontQ.textContent = 'Erro ao carregar.';
+    questionText.textContent = 'Erro ao carregar.';
   });
-
-  /* ── Shuffle (initial only) ── */
 
   function shuffleAll() {
     for (var i = questions.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
-      var tmp = questions[i];
-      questions[i] = questions[j];
-      questions[j] = tmp;
+      var tmp = questions[i]; questions[i] = questions[j]; questions[j] = tmp;
     }
   }
 
-  /* ── Card stack ── */
-
-  function showQ(index) {
-    if (index < 0 || index >= questions.length) return;
-    qIndex = index;
-    frontQ.textContent = questions[qIndex];
-    backQ.textContent = qIndex < questions.length - 1 ? questions[qIndex + 1] : questions[qIndex - 1];
-    resetStyle(frontEl);
-    resetStyle(backEl);
-  }
+  /* ── helpers ── */
 
   function resetStyle(el) {
     el.style.transition = '';
@@ -84,146 +66,216 @@
     el.style.opacity = '';
   }
 
-  function goNext() {
-    if (busy || qIndex >= questions.length - 1) {
-      if (qIndex >= questions.length - 1) toast('Última pergunta');
-      return;
+  function hideBack() {
+    backCard.classList.add('idle');
+  }
+
+  function showBack() {
+    backCard.classList.remove('idle');
+  }
+
+  /* ── question mode ── */
+
+  function showQ(index) {
+    if (index < 0 || index >= questions.length) return;
+    qIndex = index;
+    questionText.textContent = questions[qIndex];
+    updateBackQ();
+    resetStyle(frontCard);
+    hideBack();
+    setBackContentQ();
+  }
+
+  function updateBackQ() {
+    if (qIndex < questions.length - 1) {
+      var next = questions[qIndex + 1];
+      backInner.textContent = next;
     }
-    busy = true;
-    slideMain(qIndex + 1, -1);
+  }
+
+  function setBackContentQ() {
+    var nextIdx = qIndex < questions.length - 1 ? qIndex + 1 : qIndex - 1;
+    if (nextIdx >= 0 && nextIdx < questions.length) {
+      backInner.textContent = questions[nextIdx];
+    }
+  }
+
+  /* ── about mode ── */
+
+  function showA(index) {
+    if (index < 0 || index >= aboutPages.length) return;
+    aIndex = index;
+    renderAbout(frontInner, aIndex);
+    renderAbout(backInner, aIndex < aboutPages.length - 1 ? aIndex + 1 : 0);
+    updateDots();
+    resetStyle(frontCard);
+    hideBack();
+  }
+
+  function renderAbout(el, idx) {
+    var page = aboutPages[idx];
+    if (!page) return;
+    var html = '<div class="about-title">' + esc(page.title) + '</div>';
+    if (page.type === 'text') {
+      html += '<div class="about-text">' + esc(page.body) + '</div>';
+    } else if (page.type === 'list') {
+      html += '<ul class="about-list">';
+      page.items.forEach(function (item) {
+        html += '<li>' + esc(item) + '</li>';
+      });
+      html += '</ul>';
+    }
+    el.innerHTML = html;
+  }
+
+  function updateDots() {
+    var dots = aboutDots.querySelectorAll('.about-dot');
+    dots.forEach(function (d, i) {
+      d.classList.toggle('active', i === aIndex);
+    });
+  }
+
+  function renderDots() {
+    var html = '';
+    for (var i = 0; i < aboutPages.length; i++) {
+      html += '<span class="about-dot' + (i === 0 ? ' active' : '') + '"></span>';
+    }
+    aboutDots.innerHTML = html;
+  }
+
+  function esc(str) {
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode(str));
+    return d.innerHTML;
+  }
+
+  /* ── mode toggle ── */
+
+  function toggleAbout() {
+    aboutMode = !aboutMode;
+
+    if (aboutMode) {
+      aboutBtn.hidden = true;
+      aboutCloseBtn.hidden = false;
+      shareBtn.hidden = true;
+      aboutDots.hidden = false;
+      questionText.hidden = true;
+      aboutContent.hidden = false;
+
+      aIndex = 0;
+      renderAbout(frontInner, 0);
+      renderAbout(backInner, 1);
+      updateDots();
+      hideBack();
+    } else {
+      aboutBtn.hidden = false;
+      aboutCloseBtn.hidden = true;
+      shareBtn.hidden = false;
+      aboutDots.hidden = true;
+      questionText.hidden = false;
+      aboutContent.hidden = true;
+
+      showQ(qIndex);
+    }
+    resetStyle(frontCard);
+  }
+
+  /* ── navigation (mode-aware) ── */
+
+  function goNext() {
+    if (busy) return;
+    if (aboutMode) {
+      if (aIndex >= aboutPages.length - 1) { toggleAbout(); return; }
+      busy = true;
+      var target = aIndex + 1;
+      renderAbout(backInner, target);
+      showBack();
+      slideNext(target, function () {
+        aIndex = target;
+        renderAbout(frontInner, aIndex);
+        renderAbout(backInner, aIndex < aboutPages.length - 1 ? aIndex + 1 : 0);
+        updateDots();
+        hideBack();
+      });
+    } else {
+      if (qIndex >= questions.length - 1) { toast('Última pergunta'); return; }
+      busy = true;
+      var target = qIndex + 1;
+      showBack();
+      slideNext(target, function () {
+        qIndex = target;
+        questionText.textContent = questions[qIndex];
+        updateBackQ();
+        hideBack();
+      });
+    }
   }
 
   function goPrev() {
     if (busy) return;
-    if (qIndex <= 0) { toast('Primeira pergunta'); return; }
-    busy = true;
-    backQ.textContent = questions[qIndex - 1];
-    resetStyle(backEl);
-    slideMain(qIndex - 1, 1);
+    if (aboutMode) {
+      if (aIndex <= 0) return;
+      busy = true;
+      var target = aIndex - 1;
+      renderAbout(backInner, target);
+      showBack();
+      slidePrev(target, function () {
+        aIndex = target;
+        renderAbout(frontInner, aIndex);
+        renderAbout(backInner, aIndex < aboutPages.length - 1 ? aIndex + 1 : 0);
+        updateDots();
+        hideBack();
+      });
+    } else {
+      if (qIndex <= 0) { toast('Primeira pergunta'); return; }
+      busy = true;
+      var target = qIndex - 1;
+      backInner.textContent = questions[target];
+      showBack();
+      slidePrev(target, function () {
+        qIndex = target;
+        questionText.textContent = questions[qIndex];
+        updateBackQ();
+        hideBack();
+      });
+    }
   }
 
-  function slideMain(target, dir) {
-    var outX = dir * -100;
-    var inX = dir * 100;
-
-    frontEl.style.transition = 'transform 0.3s ease';
-    frontEl.style.transform = 'translateX(' + outX + '%)';
-
+  function slideNext(target, done) {
+    frontCard.style.transition = 'transform 0.3s ease';
+    frontCard.style.transform = 'translateX(-100%)';
     setTimeout(function () {
-      qIndex = target;
-      frontQ.textContent = questions[qIndex];
-      backQ.textContent = qIndex < questions.length - 1 ? questions[qIndex + 1] : questions[qIndex - 1];
-
-      frontEl.style.transition = 'none';
-      frontEl.style.transform = 'translateX(' + inX + '%)';
-      frontEl.offsetHeight;
-
-      frontEl.style.transition = 'transform 0.35s ease';
-      frontEl.style.transform = 'translateX(0%)';
-
+      done();
+      frontCard.style.transition = 'none';
+      frontCard.style.transform = 'translateX(40px)';
+      frontCard.offsetHeight;
+      frontCard.style.transition = 'transform 0.35s ease';
+      frontCard.style.transform = 'translateX(0%)';
       setTimeout(function () {
-        resetStyle(frontEl);
+        resetStyle(frontCard);
         busy = false;
       }, 380);
     }, 320);
   }
 
-  /* ── Drag (main) ── */
-
-  var THRESHOLD = 80;
-  var drag = { active: false, startX: 0, startY: 0, dx: 0, moved: false, onBtn: false };
-  var aboutDrag = { active: false, startX: 0, startY: 0, dx: 0, moved: false };
-
-  function isOnButton(el) {
-    while (el) { if (el.tagName === 'BUTTON') return true; el = el.parentElement; }
-    return false;
-  }
-
-  function dragQStart(x, y, target) {
-    if (busy || aboutOpen) return;
-    if (isOnButton(target)) return;
-    drag.active = true;
-    drag.startX = x;
-    drag.startY = y;
-    drag.dx = 0;
-    drag.moved = false;
-    frontEl.style.transition = 'none';
-    if (qIndex < questions.length - 1) {
-      backQ.textContent = questions[qIndex + 1];
-    }
-    resetStyle(backEl);
-  }
-
-  function dragQMove(x, y) {
-    if (!drag.active) return;
-    var dx = x - drag.startX;
-    var dy = y - drag.startY;
-    if (!drag.moved && Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
-    drag.moved = true;
-    drag.dx = dx;
-    if (Math.abs(dx) > Math.abs(dy) * 0.3) {
-      frontEl.style.transform = 'translateX(' + dx + 'px)';
-    }
-  }
-
-  function dragQEnd() {
-    if (!drag.active) return;
-    drag.active = false;
-    if (!drag.moved) { goNext(); return; }
-    var dx = drag.dx;
-    if (Math.abs(dx) >= THRESHOLD) {
-      if (dx < 0 && qIndex < questions.length - 1) {
-        busy = true;
-        finishDragQ(-1, function () {
-          qIndex++;
-          frontQ.textContent = questions[qIndex];
-          resetDragQ(-1);
-        });
-      } else if (dx > 0 && qIndex > 0) {
-        busy = true;
-        backQ.textContent = questions[qIndex - 1];
-        resetStyle(backEl);
-        finishDragQ(1, function () {
-          qIndex--;
-          frontQ.textContent = questions[qIndex];
-          resetDragQ(1);
-        });
-      } else {
-        snapQ();
-      }
-    } else {
-      snapQ();
-    }
-  }
-
-  function finishDragQ(dir, cb) {
-    var outX = dir === -1 ? '-100%' : '100%';
-    frontEl.style.transition = 'transform 0.25s ease';
-    frontEl.style.transform = 'translateX(' + outX + ')';
-    setTimeout(cb, 260);
-  }
-
-  function resetDragQ(dir) {
-    var inX = dir === -1 ? '40px' : '-40px';
-    frontEl.style.transition = 'none';
-    frontEl.style.transform = 'translateX(' + inX + ')';
-    frontEl.offsetHeight;
-    frontEl.style.transition = 'transform 0.3s ease';
-    frontEl.style.transform = 'translateX(0px)';
-    backQ.textContent = qIndex < questions.length - 1 ? questions[qIndex + 1] : questions[qIndex - 1];
+  function slidePrev(target, done) {
+    frontCard.style.transition = 'transform 0.3s ease';
+    frontCard.style.transform = 'translateX(100%)';
     setTimeout(function () {
-      resetStyle(frontEl);
-      busy = false;
-    }, 350);
+      done();
+      frontCard.style.transition = 'none';
+      frontCard.style.transform = 'translateX(-40px)';
+      frontCard.offsetHeight;
+      frontCard.style.transition = 'transform 0.35s ease';
+      frontCard.style.transform = 'translateX(0%)';
+      setTimeout(function () {
+        resetStyle(frontCard);
+        busy = false;
+      }, 380);
+    }, 320);
   }
 
-  function snapQ() {
-    frontEl.style.transition = 'transform 0.3s ease';
-    frontEl.style.transform = 'translateX(0px)';
-    setTimeout(function () { resetStyle(frontEl); }, 350);
-  }
-
-  /* ── Share ── */
+  /* ── share ── */
 
   var logoImg = null;
 
@@ -235,7 +287,7 @@
   loadLogo();
 
   function shareQuestion() {
-    var text = frontQ.textContent;
+    var text = questionText.textContent;
     if (!text || text === 'Erro ao carregar.') return;
 
     var canvas = document.createElement('canvas');
@@ -246,72 +298,63 @@
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, 1080, 1920);
 
-    // Subtle grain
+    // subtle grain
     ctx.fillStyle = '#0a0a0a';
     for (var i = 0; i < 300; i++) {
       ctx.fillRect(Math.random() * 1080, Math.random() * 1920, 1, 1);
     }
 
-    // Top accent line
-    ctx.fillStyle = 'rgba(255,255,255,0.06)';
-    ctx.fillRect(0, 0, 1080, 1);
-
-    // Logo
+    // logo
     if (logoImg) {
-      var logoSize = 200;
-      var logoX = (1080 - logoSize) / 2;
-      var logoY = 320;
+      var s = 200;
       ctx.save();
       ctx.beginPath();
-      ctx.arc(540, logoY + logoSize / 2, logoSize / 2 + 8, 0, Math.PI * 2);
+      ctx.arc(540, 320 + s / 2, s / 2 + 8, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(255,255,255,0.04)';
       ctx.fill();
       ctx.restore();
-      ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+      ctx.drawImage(logoImg, (1080 - s) / 2, 320, s, s);
     }
 
-    // Question
+    // question
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-
-    var fontSize = 56;
-    ctx.font = '400 ' + fontSize + 'px Georgia, "Playfair Display", serif';
+    var fs = 56;
+    ctx.font = '400 ' + fs + 'px Georgia, "Playfair Display", serif';
 
     var words = text.split(' ');
     var lines = [];
     var line = '';
-    var maxWidth = 760;
-
+    var maxW = 760;
     for (var w = 0; w < words.length; w++) {
-      var testLine = line + words[w] + ' ';
-      var metrics = ctx.measureText(testLine);
-      if (metrics.width > maxWidth && line.length > 0) {
+      var test = line + words[w] + ' ';
+      if (ctx.measureText(test).width > maxW && line.length > 0) {
         lines.push(line.trim());
         line = words[w] + ' ';
       } else {
-        line = testLine;
+        line = test;
       }
     }
     lines.push(line.trim());
 
-    var lineHeight = fontSize * 1.5;
-    var totalH = lines.length * lineHeight;
+    var lh = fs * 1.5;
+    var totalH = lines.length * lh;
     var startY = 700;
-    var firstY = startY - totalH / 2 + lineHeight / 2;
+    var firstY = startY - totalH / 2 + lh / 2;
 
-    // Subtle shadow
+    // shadow
     ctx.fillStyle = 'rgba(255,255,255,0.03)';
     for (var l = 0; l < lines.length; l++) {
-      ctx.fillText(lines[l], 542, firstY + l * lineHeight + 2);
+      ctx.fillText(lines[l], 542, firstY + l * lh + 2);
     }
 
     ctx.fillStyle = '#ffffff';
     for (var l = 0; l < lines.length; l++) {
-      ctx.fillText(lines[l], 540, firstY + l * lineHeight);
+      ctx.fillText(lines[l], 540, firstY + l * lh);
     }
 
-    // Footer
+    // footer
     ctx.fillStyle = 'rgba(255,255,255,0.2)';
     ctx.font = '24px Georgia, serif';
     ctx.fillText('naroda.app', 540, 1760);
@@ -334,173 +377,135 @@
     });
   }
 
-  /* ── About overlay ── */
+  /* ── drag (mode-aware) ── */
 
-  function openAbout() {
-    if (aboutPages.length === 0) return;
-    aboutOpen = true;
-    aIndex = 0;
-    renderAboutCard(aboutFrontInner, aIndex);
-    renderAboutCard(aboutBackInner, aIndex < aboutPages.length - 1 ? aIndex + 1 : 0);
-    aboutFront.style.transform = '';
-    aboutBack.style.transform = '';
-    updateAboutUI();
-    overlay.classList.add('open');
+  var THRESHOLD = 80;
+  var drag = { active: false, startX: 0, startY: 0, dx: 0, moved: false, onBtn: false };
+
+  function isOnButton(el) {
+    while (el) { if (el.tagName === 'BUTTON') return true; el = el.parentElement; }
+    return false;
   }
 
-  function closeAbout() {
-    aboutOpen = false;
-    overlay.classList.remove('open');
-  }
+  function dragStart(x, y, target) {
+    if (busy) return;
+    if (isOnButton(target)) return;
+    drag.active = true;
+    drag.startX = x;
+    drag.startY = y;
+    drag.dx = 0;
+    drag.moved = false;
+    frontCard.style.transition = 'none';
 
-  function aboutNextPage() {
-    if (aIndex >= aboutPages.length - 1) { closeAbout(); return; }
-    aIndex++;
-    renderAboutCard(aboutBackInner, aIndex);
-    resetStyle(aboutBack);
-    slideAbout(aIndex, -1);
-  }
-
-  function aboutPrevPage() {
-    if (aIndex <= 0) return;
-    aIndex--;
-    renderAboutCard(aboutBackInner, aIndex);
-    resetStyle(aboutBack);
-    slideAbout(aIndex, 1);
-  }
-
-  function slideAbout(target, dir) {
-    var outX = dir * -100;
-    var inX = dir * 100;
-
-    aboutFront.style.transition = 'transform 0.3s ease';
-    aboutFront.style.transform = 'translateX(' + outX + '%)';
-
-    setTimeout(function () {
-      renderAboutCard(aboutFrontInner, target);
-      renderAboutCard(aboutBackInner, target < aboutPages.length - 1 ? target + 1 : 0);
-      aboutFront.style.transition = 'none';
-      aboutFront.style.transform = 'translateX(' + inX + '%)';
-      aboutFront.offsetHeight;
-      aboutFront.style.transition = 'transform 0.35s ease';
-      aboutFront.style.transform = 'translateX(0%)';
-      updateAboutUI();
-      setTimeout(function () { resetStyle(aboutFront); }, 380);
-    }, 320);
-  }
-
-  function renderAboutCard(el, idx) {
-    var page = aboutPages[idx];
-    if (!page) return;
-    var html = '<div class="about-title">' + esc(page.title) + '</div>';
-    if (page.type === 'text') {
-      html += '<div class="about-text">' + esc(page.body) + '</div>';
-    } else if (page.type === 'list') {
-      html += '<ul class="about-list">';
-      page.items.forEach(function (item) {
-        html += '<li>' + esc(item) + '</li>';
-      });
-      html += '</ul>';
+    if (aboutMode) {
+      var nextIdx = aIndex < aboutPages.length - 1 ? aIndex + 1 : -1;
+      if (nextIdx >= 0) renderAbout(backInner, nextIdx);
+    } else {
+      if (qIndex < questions.length - 1) backInner.textContent = questions[qIndex + 1];
     }
-    el.innerHTML = html;
+    showBack();
+    resetStyle(backCard);
   }
 
-  function renderAboutDots() {
-    var html = '';
-    for (var i = 0; i < aboutPages.length; i++) {
-      html += '<span class="about-dot' + (i === 0 ? ' active' : '') + '"></span>';
-    }
-    aboutDots.innerHTML = html;
-  }
-
-  function updateAboutUI() {
-    aboutCounter.textContent = (aIndex + 1) + ' / ' + aboutPages.length;
-    var dots = aboutDots.querySelectorAll('.about-dot');
-    dots.forEach(function (d, i) {
-      d.classList.toggle('active', i === aIndex);
-    });
-  }
-
-  function esc(str) {
-    var d = document.createElement('div');
-    d.appendChild(document.createTextNode(str));
-    return d.innerHTML;
-  }
-
-  /* ── About drag ── */
-
-  function dragAStart(x, y) {
-    aboutDrag.active = true;
-    aboutDrag.startX = x;
-    aboutDrag.startY = y;
-    aboutDrag.dx = 0;
-    aboutDrag.moved = false;
-    aboutFront.style.transition = 'none';
-    var nextIdx = aIndex < aboutPages.length - 1 ? aIndex + 1 : -1;
-    if (nextIdx >= 0) {
-      renderAboutCard(aboutBackInner, nextIdx);
-    }
-    resetStyle(aboutBack);
-  }
-
-  function dragAMove(x, y) {
-    if (!aboutDrag.active) return;
-    var dx = x - aboutDrag.startX;
-    var dy = y - aboutDrag.startY;
-    if (!aboutDrag.moved && Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
-    aboutDrag.moved = true;
-    aboutDrag.dx = dx;
+  function dragMove(x, y) {
+    if (!drag.active) return;
+    var dx = x - drag.startX;
+    var dy = y - drag.startY;
+    if (!drag.moved && Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+    drag.moved = true;
+    drag.dx = dx;
     if (Math.abs(dx) > Math.abs(dy) * 0.3) {
-      aboutFront.style.transform = 'translateX(' + dx + 'px)';
+      frontCard.style.transform = 'translateX(' + dx + 'px)';
     }
   }
 
-  function dragAEnd() {
-    if (!aboutDrag.active) return;
-    aboutDrag.active = false;
-    if (!aboutDrag.moved) {
-      if (aIndex < aboutPages.length - 1) aboutNextPage();
-      return;
-    }
-    var dx = aboutDrag.dx;
+  function dragEnd() {
+    if (!drag.active) return;
+    drag.active = false;
+    if (!drag.moved) { goNext(); return; }
+
+    var dx = drag.dx;
     if (Math.abs(dx) >= THRESHOLD) {
-      if (dx < 0 && aIndex < aboutPages.length - 1) {
-        aIndex++;
-        renderAboutCard(aboutFrontInner, aIndex);
-        renderAboutCard(aboutBackInner, aIndex < aboutPages.length - 1 ? aIndex + 1 : 0);
-        finishAboutDrag(-1);
-      } else if (dx > 0 && aIndex > 0) {
-        aIndex--;
-        renderAboutCard(aboutFrontInner, aIndex);
-        renderAboutCard(aboutBackInner, aIndex < aboutPages.length - 1 ? aIndex + 1 : 0);
-        finishAboutDrag(1);
+      if (dx < 0) {
+        if (aboutMode && aIndex < aboutPages.length - 1) {
+          busy = true;
+          finishDrag(-1, function () {
+            aIndex++;
+            renderAbout(frontInner, aIndex);
+            renderAbout(backInner, aIndex < aboutPages.length - 1 ? aIndex + 1 : 0);
+            updateDots();
+            hideBack();
+          });
+        } else if (!aboutMode && qIndex < questions.length - 1) {
+          busy = true;
+          finishDrag(-1, function () {
+            qIndex++;
+            questionText.textContent = questions[qIndex];
+            updateBackQ();
+            hideBack();
+          });
+        } else {
+          snapBack();
+        }
       } else {
-        snapAbout();
+        if (aboutMode && aIndex > 0) {
+          busy = true;
+          backInner.innerHTML = '';
+          renderAbout(backInner, aIndex - 1);
+          finishDrag(1, function () {
+            aIndex--;
+            renderAbout(frontInner, aIndex);
+            renderAbout(backInner, aIndex < aboutPages.length - 1 ? aIndex + 1 : 0);
+            updateDots();
+            hideBack();
+          });
+        } else if (!aboutMode && qIndex > 0) {
+          busy = true;
+          backInner.textContent = questions[qIndex - 1];
+          finishDrag(1, function () {
+            qIndex--;
+            questionText.textContent = questions[qIndex];
+            updateBackQ();
+            hideBack();
+          });
+        } else {
+          snapBack();
+        }
       }
     } else {
-      snapAbout();
+      snapBack();
     }
   }
 
-  function finishAboutDrag(dir) {
+  function finishDrag(dir, done) {
     var outX = dir === -1 ? '-100%' : '100%';
-    aboutFront.style.transition = 'transform 0.25s ease';
-    aboutFront.style.transform = 'translateX(' + outX + ')';
+    frontCard.style.transition = 'transform 0.25s ease';
+    frontCard.style.transform = 'translateX(' + outX + ')';
     setTimeout(function () {
-      aboutFront.style.transition = 'none';
-      aboutFront.style.transform = 'translateX(0%)';
-      updateAboutUI();
-      setTimeout(function () { resetStyle(aboutFront); }, 50);
+      done();
+      var inX = dir === -1 ? '40px' : '-40px';
+      frontCard.style.transition = 'none';
+      frontCard.style.transform = 'translateX(' + inX + ')';
+      frontCard.offsetHeight;
+      frontCard.style.transition = 'transform 0.3s ease';
+      frontCard.style.transform = 'translateX(0px)';
+      setTimeout(function () {
+        resetStyle(frontCard);
+        busy = false;
+      }, 350);
     }, 260);
   }
 
-  function snapAbout() {
-    aboutFront.style.transition = 'transform 0.3s ease';
-    aboutFront.style.transform = 'translateX(0px)';
-    setTimeout(function () { resetStyle(aboutFront); }, 350);
+  function snapBack() {
+    frontCard.style.transition = 'transform 0.3s ease';
+    frontCard.style.transform = 'translateX(0px)';
+    setTimeout(function () {
+      resetStyle(frontCard);
+      hideBack();
+    }, 350);
   }
 
-  /* ── Toast ── */
+  /* ── toast ── */
 
   function toast(msg) {
     toastEl.textContent = msg;
@@ -509,7 +514,9 @@
     toastEl._timeout = setTimeout(function () { toastEl.classList.remove('show'); }, 1400);
   }
 
-  /* ── Install PWA ── */
+  /* ── install ── */
+
+  var deferredPrompt = null;
 
   window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault();
@@ -519,7 +526,7 @@
 
   installBtn.addEventListener('click', function () {
     if (!deferredPrompt) {
-      toast('No Safari, use Compartilhar → Adicionar à Tela de Início');
+      toast('No Safari: Compartilhar → Adicionar à Tela de Início');
       return;
     }
     deferredPrompt.prompt();
@@ -529,73 +536,48 @@
     });
   });
 
-  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  if (isIOS && !window.matchMedia('(display-mode: standalone)').matches) {
+  if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.matchMedia('(display-mode: standalone)').matches) {
     installBtn.textContent = 'iOS';
     installBtn.classList.add('visible');
   }
 
-  /* ── Events ── */
+  /* ── events ── */
 
-  // Touch
   document.addEventListener('touchstart', function (e) {
     var t = e.changedTouches[0];
-    if (aboutOpen) dragAStart(t.clientX, t.clientY);
-    else dragQStart(t.clientX, t.clientY, e.target);
+    dragStart(t.clientX, t.clientY, e.target);
   }, { passive: true });
 
   document.addEventListener('touchmove', function (e) {
     var t = e.changedTouches[0];
-    if (aboutOpen) dragAMove(t.clientX, t.clientY);
-    else dragQMove(t.clientX, t.clientY);
+    dragMove(t.clientX, t.clientY);
   }, { passive: true });
 
-  document.addEventListener('touchend', function () {
-    if (aboutOpen) dragAEnd();
-    else dragQEnd();
-  }, { passive: true });
+  document.addEventListener('touchend', function () { dragEnd(); }, { passive: true });
 
-  // Mouse
   document.addEventListener('mousedown', function (e) {
-    if (aboutOpen) dragAStart(e.clientX, e.clientY);
-    else dragQStart(e.clientX, e.clientY, e.target);
+    dragStart(e.clientX, e.clientY, e.target);
   });
 
   document.addEventListener('mousemove', function (e) {
-    if (aboutOpen) dragAMove(e.clientX, e.clientY);
-    else dragQMove(e.clientX, e.clientY);
+    dragMove(e.clientX, e.clientY);
   });
 
-  document.addEventListener('mouseup', function () {
-    if (aboutOpen) dragAEnd();
-    else dragQEnd();
-  });
+  document.addEventListener('mouseup', function () { dragEnd(); });
 
-  // Buttons
   prevBtn.addEventListener('click', function (e) { e.stopPropagation(); goPrev(); });
   nextBtn.addEventListener('click', function (e) { e.stopPropagation(); goNext(); });
   shareBtn.addEventListener('click', function (e) { e.stopPropagation(); shareQuestion(); });
-  aboutBtn.addEventListener('click', function () { openAbout(); });
-  aboutClose.addEventListener('click', closeAbout);
-  aboutPrev.addEventListener('click', aboutPrevPage);
-  aboutNext.addEventListener('click', aboutNextPage);
+  aboutBtn.addEventListener('click', toggleAbout);
+  aboutCloseBtn.addEventListener('click', toggleAbout);
 
-  // Keyboard
   document.addEventListener('keydown', function (e) {
-    if (aboutOpen) {
-      if (e.code === 'ArrowLeft') aboutPrevPage();
-      else if (e.code === 'ArrowRight') aboutNextPage();
-      else if (e.code === 'Escape') closeAbout();
-      return;
-    }
-    if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') goPrev();
-    else if (e.code === 'ArrowRight' || e.code === 'ArrowDown') goNext();
+    if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') { e.preventDefault(); goPrev(); }
+    else if (e.code === 'ArrowRight' || e.code === 'ArrowDown') { e.preventDefault(); goNext(); }
     else if (e.code === 'Space') { e.preventDefault(); goNext(); }
+    else if (e.code === 'Escape' && aboutMode) toggleAbout();
   });
 
-  // Close about on last page next click (already handled in aboutNextPage)
-
-  // PWA
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
       navigator.serviceWorker.register('service-worker.js').catch(function () {});

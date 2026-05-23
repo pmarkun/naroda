@@ -10,7 +10,7 @@
   --bg: #000000;
   --fg: #ffffff;
   --fg-muted: rgba(255, 255, 255, 0.5);
-  --fg-dim: rgba(255, 255, 255, 0.2);
+  --fg-dim: rgba(255, 255, 255, 0.15);
   --card-border: rgba(255, 255, 255, 0.1);
   --font-display: 'Playfair Display', Georgia, serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -42,22 +42,38 @@ body {
   min-height: 100dvh;
   max-width: 640px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 20px;
   width: 100%;
 }
 
-/* ── Top Bar ── */
+/* ── Frame (the card container) ── */
 
-.top-bar {
+.frame {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 12px 0 4px;
-  flex-shrink: 0;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
 }
 
-.top-btn {
+/* ── Frame top ── */
+
+.frame-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 4px 4px;
+  flex-shrink: 0;
+  min-height: 44px;
+}
+
+.frame-top-left,
+.frame-top-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.frame-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -71,24 +87,26 @@ body {
   transition: all 0.2s ease;
 }
 
-.top-btn:active {
+.frame-btn:active {
   background: rgba(255, 255, 255, 0.08);
   transform: scale(0.92);
 }
 
 .install-btn {
   font-family: var(--font-body);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  width: auto;
-  height: 32px;
-  padding: 0 16px;
+  height: 30px;
+  padding: 0 12px;
   border-radius: 100px;
   border: 1px solid var(--fg-dim);
+  background: transparent;
   color: var(--fg-muted);
+  cursor: pointer;
   display: none;
+  transition: all 0.2s ease;
 }
 
 .install-btn:active {
@@ -96,31 +114,26 @@ body {
 }
 
 .install-btn.visible {
-  display: flex;
+  display: inline-flex;
+  align-items: center;
 }
 
-/* ── Swipe Area ── */
+/* ── Card stack ── */
 
-.swipe-area {
-  flex: 1;
+.stack {
   display: flex;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
   overflow: hidden;
-  position: relative;
-}
-
-/* ── Card Stack ── */
-
-.card-stack {
-  flex: 1;
-  position: relative;
-  display: flex;
-  width: 100%;
+  margin: 4px 0;
 }
 
 .card {
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background: var(--bg);
@@ -135,166 +148,43 @@ body {
   z-index: 1;
 }
 
-.card-content {
-  width: 100%;
-  padding: 20px;
-  text-align: center;
+.card--back.idle {
+  opacity: 0;
+  pointer-events: none;
 }
 
-#frontQuestion,
-#backQuestion {
+.card-inner {
+  width: 100%;
+  padding: 12px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+}
+
+#questionText {
   font-family: var(--font-display);
   font-size: 1.5rem;
   font-weight: 400;
   line-height: 1.55;
   text-wrap: pretty;
+  max-width: 100%;
 }
 
-/* ── Nav ── */
-
-.nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px));
-  flex-shrink: 0;
-}
-
-.nav-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--fg-muted);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.nav-btn:active {
-  background: rgba(255, 255, 255, 0.08);
-  transform: scale(0.92);
-}
-
-.nav-btn svg {
-  display: block;
-}
-
-.nav-btn--share {
-  width: 64px;
-  height: 64px;
-  color: var(--fg);
-  margin: 0 16px;
-  border: 1px solid var(--fg-dim);
-  transition: all 0.25s ease;
-}
-
-.nav-btn--share:active {
-  background: var(--fg);
-  color: var(--bg);
-  border-color: var(--fg);
-}
-
-/* ── Overlay ── */
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.35s ease;
-}
-
-.overlay.open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.overlay-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px 0;
-  flex-shrink: 0;
-}
-
-.overlay-counter {
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 400;
-  color: var(--fg-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.overlay-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--fg-muted);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.overlay-close:active {
-  background: rgba(255, 255, 255, 0.08);
-  transform: scale(0.92);
-}
-
-.overlay-body {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-  padding: 0 20px;
-}
-
-.about-stack {
-  flex: 1;
-  position: relative;
-  display: flex;
+#aboutContent {
   width: 100%;
-}
-
-.about-card {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
   overflow-y: auto;
-  padding: 20px 0;
-}
-
-.about-card--front {
-  z-index: 2;
-  will-change: transform;
-}
-
-.about-card--back {
-  z-index: 1;
-}
-
-.about-card-inner {
-  width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
+  max-height: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .about-title {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 600;
   margin-bottom: 20px;
   color: var(--fg);
@@ -302,7 +192,7 @@ body {
 
 .about-text {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 300;
   line-height: 1.7;
   color: var(--fg-muted);
@@ -311,16 +201,18 @@ body {
 
 .about-list {
   list-style: none;
-  padding: 0;
+  text-align: left;
+  max-width: 380px;
+  margin: 0 auto;
 }
 
 .about-list li {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 300;
   line-height: 1.6;
   color: var(--fg-muted);
-  padding: 6px 0;
+  padding: 5px 0;
   padding-left: 20px;
   position: relative;
 }
@@ -332,24 +224,20 @@ body {
   color: var(--fg-dim);
 }
 
-.overlay-footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 8px 20px calc(16px + env(safe-area-inset-bottom, 16px));
-  flex-shrink: 0;
-}
+/* ── About dots ── */
 
 .about-dots {
   display: flex;
-  gap: 6px;
+  gap: 5px;
   align-items: center;
+  justify-content: center;
+  padding: 4px 0 8px;
+  flex-shrink: 0;
 }
 
 .about-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--fg-dim);
   transition: background 0.25s ease;
@@ -357,6 +245,32 @@ body {
 
 .about-dot.active {
   background: var(--fg);
+}
+
+/* ── Frame bottom ── */
+
+.frame-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 4px calc(4px + env(safe-area-inset-bottom, 4px));
+  flex-shrink: 0;
+  min-height: 56px;
+}
+
+.frame-btn--share {
+  width: 56px;
+  height: 56px;
+  color: var(--fg);
+  margin: 0 12px;
+  border: 1px solid var(--fg-dim);
+  border-radius: 50%;
+}
+
+.frame-btn--share:active {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
 }
 
 /* ── Toast ── */
@@ -392,49 +306,54 @@ body {
   }
 
   #app {
-    padding: 24px 32px 0;
+    padding: 32px;
   }
 
-  .card {
+  .frame {
     border: 1px solid var(--card-border);
     border-radius: 28px;
-    padding: 24px;
+    padding: 8px 12px;
   }
 
-  .card-content {
-    padding: 20px 16px;
+  .frame-top {
+    padding: 8px 4px 4px;
   }
 
-  #frontQuestion,
-  #backQuestion {
-    font-size: 1.75rem;
+  .stack {
+    margin: 4px 0;
   }
 
-  .nav-btn--share:hover {
+  #questionText {
+    font-size: 1.7rem;
+  }
+
+  .about-title {
+    font-size: 1.5rem;
+  }
+
+  .about-text,
+  .about-list li {
+    font-size: 0.95rem;
+  }
+
+  .frame-bottom {
+    padding: 4px 4px 8px;
+  }
+
+  .frame-btn--share:hover {
     background: var(--fg);
     color: var(--bg);
     border-color: var(--fg);
   }
-
-  .overlay {
-    max-width: 640px;
-    margin: 0 auto;
-    inset: 40px auto;
-    border: 1px solid var(--card-border);
-    border-radius: 28px;
-    height: auto;
-    max-height: calc(100vh - 80px);
-  }
 }
 
 @media (min-width: 1024px) {
-  #frontQuestion,
-  #backQuestion {
+  #questionText {
     font-size: 2rem;
   }
 
-  .card {
-    padding: 32px;
+  .frame {
+    padding: 12px 16px;
   }
 
   .about-title {
@@ -443,28 +362,33 @@ body {
 }
 
 @media (max-height: 640px) {
-  #frontQuestion,
-  #backQuestion {
+  #questionText {
     font-size: 1.2rem;
   }
 
-  .nav-btn {
+  .frame-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .frame-btn--share {
     width: 48px;
     height: 48px;
+    margin: 0 8px;
   }
 
-  .nav-btn--share {
-    width: 54px;
-    height: 54px;
-    margin: 0 12px;
+  .frame-top {
+    padding: 4px 4px 2px;
+    min-height: 36px;
   }
 
-  .card-content {
-    padding: 12px;
+  .frame-bottom {
+    padding: 2px 4px calc(2px + env(safe-area-inset-bottom, 2px));
+    min-height: 44px;
   }
 
-  .top-bar {
-    padding: 8px 0 2px;
+  .card-inner {
+    padding: 8px 12px;
   }
 }
 
