@@ -11,7 +11,7 @@
   --fg: #ffffff;
   --fg-muted: rgba(255, 255, 255, 0.5);
   --fg-dim: rgba(255, 255, 255, 0.15);
-  --card-border: rgba(255, 255, 255, 0.08);
+  --card-border: rgba(255, 255, 255, 0.1);
   --font-display: 'Playfair Display', Georgia, serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
@@ -37,30 +37,28 @@ body {
 
 #app {
   display: flex;
-  flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh;
-  max-width: 520px;
+  max-width: 640px;
   margin: 0 auto;
   padding: 0 24px;
   width: 100%;
 }
 
-/* ── Swipe Area / Card ── */
+/* ── Swipe Area ── */
 
 .swipe-area {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  touch-action: pan-y;
   overflow: hidden;
 }
 
+/* ── Card ── */
+
 .card {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  padding: 20px 0;
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
@@ -74,13 +72,22 @@ body {
   transform: translateX(40px);
 }
 
-.card-question {
+.card-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+#question {
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 400;
   line-height: 1.55;
-  color: var(--fg);
+  text-align: center;
   text-wrap: pretty;
+  max-width: 100%;
 }
 
 /* ── Nav ── */
@@ -89,8 +96,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px 0 40px;
-  padding-bottom: max(40px, env(safe-area-inset-bottom, 40px));
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px));
+  flex-shrink: 0;
 }
 
 .nav-btn {
@@ -155,7 +162,7 @@ body {
   transform: translateX(-50%) translateY(0);
 }
 
-/* ── Desktop: outline de carta ── */
+/* ── Desktop: carta outline ocupando altura toda ── */
 
 @media (min-width: 768px) {
   body {
@@ -165,24 +172,21 @@ body {
   }
 
   #app {
-    max-width: 640px;
-    padding: 0 32px;
-  }
-
-  .swipe-area {
-    padding: 20px 0;
+    padding: 40px 32px;
   }
 
   .card {
     border: 1px solid var(--card-border);
-    border-radius: 24px;
-    padding: 56px 48px;
-    max-width: 520px;
-    margin: 0 auto;
+    border-radius: 28px;
+    padding: 24px;
   }
 
-  .card-question {
-    font-size: 2rem;
+  .card-content {
+    padding: 20px 16px;
+  }
+
+  #question {
+    font-size: 1.75rem;
   }
 
   .nav-btn--shuffle:hover {
@@ -193,21 +197,20 @@ body {
 }
 
 @media (min-width: 1024px) {
+  #question {
+    font-size: 2rem;
+  }
+
   .card {
-    padding: 64px 56px;
+    padding: 32px;
   }
 }
 
-/* ── Mobile landscape / telas baixas ── */
+/* ── Telas baixas ── */
 
 @media (max-height: 640px) {
-  .card-question {
-    font-size: 1.25rem;
-  }
-
-  .nav {
-    padding: 12px 0 24px;
-    padding-bottom: max(24px, env(safe-area-inset-bottom, 24px));
+  #question {
+    font-size: 1.2rem;
   }
 
   .nav-btn {
@@ -219,6 +222,10 @@ body {
     width: 54px;
     height: 54px;
     margin: 0 12px;
+  }
+
+  .card-content {
+    padding: 12px;
   }
 }
 
