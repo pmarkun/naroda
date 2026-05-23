@@ -9,6 +9,14 @@
   var aIndex = 0;
   var aboutMode = false;
   var busy = false;
+  var lang = 'pt';
+  var ui = {};
+
+  var LANG_NAMES = {
+    pt: 'Portugu\u00eas',
+    en: 'English',
+    es: 'Espa\u00f1ol'
+  };
 
   /* ── dom ── */
 
@@ -26,16 +34,31 @@
   var installBtn = $('installBtn');
   var toastEl = $('toast');
 
+  /* ── language ── */
+
+  function getLang() {
+    var stored = localStorage.getItem('naroda_lang');
+    if (stored && LANG_NAMES[stored]) return stored;
+    var nav = (navigator.language || '').split('-')[0];
+    if (LANG_NAMES[nav]) return nav;
+    return 'pt';
+  }
+
+  lang = getLang();
+
   /* ── load ── */
 
   Promise.all([
-    fetch('data/questions.json').then(function (r) { return r.json(); }),
-    fetch('data/about.json').then(function (r) { return r.json(); }),
+    fetch('data/' + lang + '/questions.json').then(function (r) { return r.json(); }),
+    fetch('data/' + lang + '/about.json').then(function (r) { return r.json(); }),
+    fetch('data/' + lang + '/ui.json').then(function (r) { return r.json(); }),
   ]).then(function (data) {
     data[0].forEach(function (cat) {
       cat.perguntas.forEach(function (q) { questions.push(q); });
     });
     aboutPages = data[1].pages;
+    ui = data[2];
+    installBtn.textContent = ui.installBtn || 'Instalar';
     shuffleAll();
     renderDots();
     showQ(0);
@@ -44,7 +67,7 @@
       localStorage.setItem('naroda_about_seen', '1');
     }
   }).catch(function () {
-    content.textContent = 'Erro ao carregar.';
+    content.textContent = ui.loadError || 'Erro ao carregar.';
   });
 
   function shuffleAll() {
@@ -91,6 +114,8 @@
     content.innerHTML = renderAbout(aIndex);
     updateDots();
     updateArrows();
+    var sel = document.getElementById('langSelect');
+    if (sel) sel.addEventListener('change', onLangChange);
   }
 
   function renderAbout(idx) {
@@ -104,11 +129,32 @@
       h += '<ul class="about-list">';
       page.items.forEach(function (item) { h += '<li>' + esc(item) + '</li>'; });
       h += '</ul>';
+    } else if (page.type === 'lang') {
+      h += renderLangSelect();
     }
     if (page.link) {
       h += '<a class="about-link" href="mailto:' + esc(page.link) + '">' + esc(page.link) + '</a>';
     }
     return h;
+  }
+
+  function renderLangSelect() {
+    var h = '<div class="about-text lang-select-wrap">';
+    h += '<select class="lang-select" id="langSelect">';
+    for (var code in LANG_NAMES) {
+      h += '<option value="' + code + '"' + (code === lang ? ' selected' : '') + '>' + LANG_NAMES[code] + '</option>';
+    }
+    h += '</select></div>';
+    return h;
+  }
+
+  function onLangChange() {
+    var sel = document.getElementById('langSelect');
+    if (!sel) return;
+    var newLang = sel.value;
+    if (newLang === lang) return;
+    localStorage.setItem('naroda_lang', newLang);
+    location.reload();
   }
 
   function esc(str) {
@@ -172,7 +218,7 @@
       }
       return;
     }
-    if (qIndex >= questions.length - 1) { toast('Última pergunta'); return; }
+    if (qIndex >= questions.length - 1) { toast(ui.lastCard || 'Última pergunta'); return; }
     qIndex++;
     fade(function () { showQ(qIndex); });
   }
@@ -185,7 +231,7 @@
       fade(function () { showA(aIndex); });
       return;
     }
-    if (qIndex <= 0) { toast('Primeira pergunta'); return; }
+    if (qIndex <= 0) { toast(ui.firstCard || 'Primeira pergunta'); return; }
     qIndex--;
     fade(function () { showQ(qIndex); });
   }
@@ -279,7 +325,7 @@
         document.body.appendChild(a); a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        toast('Imagem salva');
+        toast(ui.imageSaved || 'Imagem salva');
       }
     });
   }
@@ -287,7 +333,7 @@
   /* ── swipe ── */
 
   function isOnBtn(el) {
-    while (el) { if (el.tagName === 'BUTTON' || el.tagName === 'A') return true; el = el.parentElement; }
+    while (el) { if (el.tagName === 'BUTTON' || el.tagName === 'A' || el.tagName === 'SELECT' || el.tagName === 'OPTION') return true; el = el.parentElement; }
     return false;
   }
 
@@ -353,7 +399,7 @@
 
   installBtn.addEventListener('click', function () {
     if (!deferredPrompt) {
-      toast('No Safari: Compartilhar → Adicionar à Tela de Início');
+      toast(ui.iosInstall || 'No Safari: Compartilhar \u2192 Adicionar \u00e0 Tela de In\u00edcio');
       return;
     }
     deferredPrompt.prompt();

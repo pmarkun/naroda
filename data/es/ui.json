@@ -1,0 +1,10 @@
+{
+  "appName": "Na Roda",
+  "appDomain": "naroda.app",
+  "loadError": "Error al cargar.",
+  "lastCard": "Última pregunta",
+  "firstCard": "Primera pregunta",
+  "imageSaved": "Imagen guardada",
+  "iosInstall": "En Safari: Compartir → Añadir a Pantalla de Inicio",
+  "installBtn": "Instalar"
+}

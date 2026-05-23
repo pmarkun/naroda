@@ -4,5 +4,7 @@ android/.gradle/
 android/build/
 android/app/build/
 android/app-release-unsigned-aligned.apk
+android/app-release-signed.apk
 android/app-release-signed.apk.idsig
+android/app-release-bundle.aab
 android/app.apks

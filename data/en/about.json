@@ -1,0 +1,33 @@
+{
+  "pages": [
+    {
+      "title": "How to Play?",
+      "type": "text",
+      "hero": true,
+      "body": "Read the question out loud.\nAnswer."
+    },
+    {
+      "title": "Where to Play?",
+      "type": "list",
+      "items": [
+        "Meals with friends or family",
+        "Romantic dates",
+        "Bar chats",
+        "Waiting in line",
+        "Car, bus, plane, llama trips",
+        "Places with people",
+        "Places without people"
+      ]
+    },
+    {
+      "title": "Who made it?",
+      "type": "text",
+      "body": "Gabriel is bothered by the world and bothers the world back. It is through this reciprocity that he spends most of his days thinking about horizontal and cooperative structures, circles, and games. For almost thirty years, he has kept the habit of never missing a chance to ask good questions and get everyone thinking together.\n\nMaisa is the type who falls asleep thinking. An executor by solar imposition in Aries, she is full of feminine and feminist ideas. She occasionally suffers from a sudden urge to run around the block. She uses good questions as a healing process for herself and whoever else is nearby.",
+      "link": "contato@naroda.app.br"
+    },
+    {
+      "title": "Language",
+      "type": "lang"
+    }
+  ]
+}

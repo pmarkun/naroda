@@ -1,0 +1,33 @@
+{
+  "pages": [
+    {
+      "title": "¿Cómo Jugar?",
+      "type": "text",
+      "hero": true,
+      "body": "Lee la pregunta en voz alta.\nResponde."
+    },
+    {
+      "title": "¿Dónde Jugar?",
+      "type": "list",
+      "items": [
+        "Comidas con amigos o familia",
+        "Citas románticas",
+        "Charlas de bar",
+        "Filas de espera",
+        "Viajes en coche, bus, avión, llama",
+        "Lugares con gente",
+        "Lugares sin gente"
+      ]
+    },
+    {
+      "title": "¿Quién lo creó?",
+      "type": "text",
+      "body": "El mundo incomoda a Gabriel y Gabriel incomoda al mundo. Es por esta reciprocidad que pasa gran parte de sus días pensando en estructuras horizontales y cooperativas, ruedas y juegos. Hace casi treinta años mantiene el hábito de no perder la oportunidad de hacer buenas preguntas y poner a todos a pensar juntos.\n\nMaisa es del tipo que duerme pensando. Ejecutora por imposición solar en Aries, está llena de ideas femeninas y feministas. Ocasionalmente sufre de un súbito deseo de dar una vuelta corriendo a la manzana. Ella usa las buenas preguntas como proceso de curación para sí misma y para quienes estén cerca.",
+      "link": "contato@naroda.app.br"
+    },
+    {
+      "title": "Idioma",
+      "type": "lang"
+    }
+  ]
+}

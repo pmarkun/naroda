@@ -1,4 +1,4 @@
-const CACHE = 'naroda-v4';
+const CACHE = 'naroda-v5';
 
 const URLS = [
   './',
@@ -6,8 +6,6 @@ const URLS = [
   './src/styles.css',
   './src/fonts.css',
   './src/app.js',
-  './data/questions.json',
-  './data/about.json',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -16,6 +14,16 @@ const URLS = [
   './fonts/Inter.woff2',
   './fonts/PlayfairDisplay.woff2',
   './fonts/PlayfairDisplay-Italic.woff2',
+  './data/pt/questions.json',
+  './data/pt/about.json',
+  './data/pt/ui.json',
+  './data/en/questions.json',
+  './data/en/about.json',
+  './data/en/ui.json',
+  './data/es/questions.json',
+  './data/es/about.json',
+  './data/es/ui.json',
+  './privacidade.html',
 ];
 
 self.addEventListener('install', function (event) {
