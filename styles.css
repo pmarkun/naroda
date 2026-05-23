@@ -46,7 +46,7 @@ body {
   width: 100%;
 }
 
-/* ── Frame (the card container) ── */
+/* ── Frame ── */
 
 .frame {
   display: flex;
@@ -73,7 +73,7 @@ body {
   gap: 4px;
 }
 
-.frame-btn {
+.top-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -87,12 +87,12 @@ body {
   transition: all 0.2s ease;
 }
 
-.frame-btn:active {
+.top-btn:active {
   background: rgba(255, 255, 255, 0.08);
   transform: scale(0.92);
 }
 
-.install-btn {
+.install {
   font-family: var(--font-body);
   font-size: 0.65rem;
   font-weight: 500;
@@ -109,80 +109,42 @@ body {
   transition: all 0.2s ease;
 }
 
-.install-btn:active {
+.install:active {
   background: rgba(255, 255, 255, 0.08);
 }
 
-.install-btn.visible {
+.install.visible {
   display: inline-flex;
   align-items: center;
 }
 
-/* ── Card stack ── */
+/* ── Stack (content area) ── */
 
 .stack {
-  display: flex;
-  flex-direction: column;
   flex: 1;
-  position: relative;
-  overflow: hidden;
-  margin: 4px 0;
-}
-
-.card {
-  position: absolute;
-  inset: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--bg);
-}
-
-.card--front {
-  z-index: 2;
-  will-change: transform;
-}
-
-.card--back {
-  z-index: 1;
-}
-
-.card--back.idle {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.card-inner {
-  width: 100%;
-  padding: 12px 16px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
   min-height: 0;
+  position: relative;
 }
 
-#questionText {
+.stack-content {
+  width: 100%;
+  padding: 20px;
+  text-align: center;
   font-family: var(--font-display);
   font-size: 1.5rem;
   font-weight: 400;
   line-height: 1.55;
+  color: var(--fg);
   text-wrap: pretty;
-  max-width: 100%;
-}
-
-#aboutContent {
-  width: 100%;
-  text-align: center;
   overflow-y: auto;
   max-height: 100%;
   -webkit-overflow-scrolling: touch;
 }
 
-.about-title {
+.stack-content .about-title {
   font-family: var(--font-display);
   font-size: 1.3rem;
   font-weight: 600;
@@ -190,7 +152,7 @@ body {
   color: var(--fg);
 }
 
-.about-text {
+.stack-content .about-text {
   font-family: var(--font-body);
   font-size: 0.9rem;
   font-weight: 300;
@@ -199,52 +161,28 @@ body {
   white-space: pre-line;
 }
 
-.about-list {
+.stack-content .about-list {
   list-style: none;
   text-align: left;
   max-width: 380px;
   margin: 0 auto;
 }
 
-.about-list li {
+.stack-content .about-list li {
   font-family: var(--font-body);
   font-size: 0.9rem;
   font-weight: 300;
   line-height: 1.6;
   color: var(--fg-muted);
-  padding: 5px 0;
-  padding-left: 20px;
+  padding: 5px 0 5px 20px;
   position: relative;
 }
 
-.about-list li::before {
+.stack-content .about-list li::before {
   content: '\2014';
   position: absolute;
   left: 0;
   color: var(--fg-dim);
-}
-
-/* ── About dots ── */
-
-.about-dots {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 0 8px;
-  flex-shrink: 0;
-}
-
-.about-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--fg-dim);
-  transition: background 0.25s ease;
-}
-
-.about-dot.active {
-  background: var(--fg);
 }
 
 /* ── Frame bottom ── */
@@ -258,7 +196,30 @@ body {
   min-height: 56px;
 }
 
-.frame-btn--share {
+.bot-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bot-btn:active {
+  background: rgba(255, 255, 255, 0.08);
+  transform: scale(0.92);
+}
+
+.bot-btn svg {
+  display: block;
+}
+
+.bot-btn--share {
   width: 56px;
   height: 56px;
   color: var(--fg);
@@ -267,10 +228,37 @@ body {
   border-radius: 50%;
 }
 
-.frame-btn--share:active {
+.bot-btn--share:active {
   background: var(--fg);
   color: var(--bg);
   border-color: var(--fg);
+}
+
+/* ── Dots ── */
+
+.frame-dots {
+  display: none;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 0 12px;
+}
+
+.frame-dots.visible {
+  display: flex;
+}
+
+.frame-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--fg-dim);
+  transition: background 0.25s ease;
+}
+
+.frame-dot.active {
+  background: var(--fg);
 }
 
 /* ── Toast ── */
@@ -312,35 +300,24 @@ body {
   .frame {
     border: 1px solid var(--card-border);
     border-radius: 28px;
-    padding: 8px 12px;
+    padding: 4px 12px;
   }
 
-  .frame-top {
-    padding: 8px 4px 4px;
-  }
-
-  .stack {
-    margin: 4px 0;
-  }
-
-  #questionText {
+  .stack-content {
     font-size: 1.7rem;
+    padding: 32px 24px;
   }
 
-  .about-title {
+  .stack-content .about-title {
     font-size: 1.5rem;
   }
 
-  .about-text,
-  .about-list li {
+  .stack-content .about-text,
+  .stack-content .about-list li {
     font-size: 0.95rem;
   }
 
-  .frame-bottom {
-    padding: 4px 4px 8px;
-  }
-
-  .frame-btn--share:hover {
+  .bot-btn--share:hover {
     background: var(--fg);
     color: var(--bg);
     border-color: var(--fg);
@@ -348,30 +325,32 @@ body {
 }
 
 @media (min-width: 1024px) {
-  #questionText {
+  .stack-content {
     font-size: 2rem;
   }
 
-  .frame {
-    padding: 12px 16px;
-  }
-
-  .about-title {
+  .stack-content .about-title {
     font-size: 1.6rem;
   }
 }
 
 @media (max-height: 640px) {
-  #questionText {
+  .stack-content {
     font-size: 1.2rem;
+    padding: 12px;
   }
 
-  .frame-btn {
+  .top-btn {
     width: 36px;
     height: 36px;
   }
 
-  .frame-btn--share {
+  .bot-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .bot-btn--share {
     width: 48px;
     height: 48px;
     margin: 0 8px;
@@ -385,10 +364,6 @@ body {
   .frame-bottom {
     padding: 2px 4px calc(2px + env(safe-area-inset-bottom, 2px));
     min-height: 44px;
-  }
-
-  .card-inner {
-    padding: 8px 12px;
   }
 }
 
