@@ -1,0 +1,29 @@
+{
+  "packageId": "br.app.naroda",
+  "host": "naroda.app.br",
+  "name": "Na Roda",
+  "launcherName": "Na Roda",
+  "display": "standalone",
+  "themeColor": "#000000",
+  "backgroundColor": "#000000",
+  "navigationColor": "#000000",
+  "navigationBarColor": "#000000",
+  "navigationBarDividerColor": "#000000",
+  "colorScheme": "dark",
+  "startUrl": "/",
+  "manifestUrl": "https://naroda.app.br/manifest.json",
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "enableNotifications": false,
+  "enableSiteSettingsShortcut": true,
+  "enableUrlBarHiding": true,
+  "edgeToEdge": true,
+  "splashScreenFadeOutDuration": 300,
+  "appVersion": "1.0.0",
+  "iconUrl": "https://naroda.app.br/icons/icon-512.png",
+  "maskableIconUrl": "https://naroda.app.br/icons/icon-512.png",
+  "signingKey": {
+    "path": "../naroda.keystore",
+    "alias": "naroda"
+  }
+}
