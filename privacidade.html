@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000000">
+  <meta name="robots" content="noindex">
+  <title>Privacidade — Na Roda</title>
+  <link rel="preconnect" href="fonts/" crossorigin>
+  <style>
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+    :root {
+      --bg: #000;
+      --fg: #fff;
+      --fg-muted: rgba(255,255,255,0.5);
+      --fg-dim: rgba(255,255,255,0.15);
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-display: 'Playfair Display', Georgia, serif;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('fonts/Inter.woff2') format('woff2');
+      font-weight: 300 600;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      src: url('fonts/PlayfairDisplay.woff2') format('woff2');
+      font-weight: 400 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 20px;
+    }
+    .card {
+      max-width: 560px;
+      width: 100%;
+    }
+    .card h1 {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 400;
+      margin-bottom: 32px;
+      color: var(--fg);
+    }
+    .card h2 {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-muted);
+      margin: 28px 0 10px;
+    }
+    .card p {
+      font-size: 0.9rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: var(--fg-muted);
+      margin-bottom: 16px;
+    }
+    .card a {
+      color: var(--fg);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+      text-decoration-color: var(--fg-dim);
+    }
+    .card a:hover {
+      text-decoration-color: var(--fg);
+    }
+    .card .footer {
+      margin-top: 48px;
+      padding-top: 20px;
+      border-top: 1px solid var(--fg-dim);
+      font-size: 0.75rem;
+      color: var(--fg-dim);
+    }
+    @media (min-width: 768px) {
+      body { padding: 64px 32px; }
+      .card h1 { font-size: 2.2rem; }
+      .card p { font-size: 0.95rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Política de Privacidade</h1>
+
+    <p>O aplicativo <strong>Na Roda</strong> não coleta, armazena ou compartilha nenhum dado pessoal dos usuários. Nenhuma informação é enviada a servidores externos.</p>
+
+    <p>Todas as perguntas, interações e preferências são processadas exclusivamente no dispositivo do usuário. O aplicativo funciona completamente offline após a primeira carga.</p>
+
+    <h2>Dados de terceiros</h2>
+    <p>O Na Roda não utiliza serviços de análise, rastreamento, publicidade ou redes sociais. Não há cookies, identificadores de dispositivo ou qualquer forma de coleta de dados.</p>
+
+    <h2>Compartilhamento</h2>
+    <p>A funcionalidade de compartilhamento do app usa a API nativa <em>Web Share</em> do navegador. O conteúdo é transferido diretamente entre aplicativos escolhidos pelo usuário — o Na Roda não tem acesso ao destino nem ao resultado do compartilhamento.</p>
+
+    <h2>Alterações</h2>
+    <p>Esta política pode ser atualizada ocasionalmente. A versão mais recente estará sempre disponível neste endereço.</p>
+
+    <h2>Contato</h2>
+    <p>Dúvidas sobre privacidade podem ser enviadas para <a href="mailto:contato@naroda.app.br">contato@naroda.app.br</a>.</p>
+
+    <div class="footer">
+      Na Roda &mdash; Última atualização: maio de 2026
+    </div>
+  </div>
+</body>
+</html>

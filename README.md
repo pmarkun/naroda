@@ -64,6 +64,16 @@ processo de cura para si e para quem mais estiver próximo.
 python3 -m http.server 8080
 ```
 
+## Publicar na Google Play Store
+
+```bash
+nix-shell                    # Enter toolchain environment
+npx @pwabuilder/bubblewrap init --manifest https://pmarkun.github.io/naroda/manifest.json
+bubblewrap build
+```
+
+Guia completo em [`BUILD_ANDROID.md`](BUILD_ANDROID.md).
+
 ## Publicar no GitHub Pages
 
 1. Crie um repositório chamado `naroda`

@@ -1,2 +1,8 @@
 naroda.keystore
 node_modules/
+android/.gradle/
+android/build/
+android/app/build/
+android/app-release-unsigned-aligned.apk
+android/app-release-signed.apk.idsig
+android/app.apks
