@@ -29,8 +29,8 @@
   /* ── load ── */
 
   Promise.all([
-    fetch('questions.json').then(function (r) { return r.json(); }),
-    fetch('about.json').then(function (r) { return r.json(); }),
+    fetch('data/questions.json').then(function (r) { return r.json(); }),
+    fetch('data/about.json').then(function (r) { return r.json(); }),
   ]).then(function (data) {
     data[0].forEach(function (cat) {
       cat.perguntas.forEach(function (q) { questions.push(q); });
@@ -98,11 +98,15 @@
     if (!page) return '';
     var h = '<div class="about-title">' + esc(page.title) + '</div>';
     if (page.type === 'text') {
-      h += '<div class="about-text">' + esc(page.body) + '</div>';
+      var cls = page.hero ? ' about-text--hero' : '';
+      h += '<div class="about-text' + cls + '">' + esc(page.body) + '</div>';
     } else if (page.type === 'list') {
       h += '<ul class="about-list">';
       page.items.forEach(function (item) { h += '<li>' + esc(item) + '</li>'; });
       h += '</ul>';
+    }
+    if (page.link) {
+      h += '<a class="about-link" href="mailto:' + esc(page.link) + '">' + esc(page.link) + '</a>';
     }
     return h;
   }
@@ -193,7 +197,7 @@
   function loadLogo() {
     var img = new Image();
     img.onload = function () { logoImg = img; };
-    img.src = 'logo_original.png';
+    img.src = 'icons/logo_original.png';
   }
   loadLogo();
 
@@ -248,7 +252,7 @@
 
     var lh = fs * 1.5;
     var totalH = lines.length * lh;
-    var startY = 700;
+    var startY = 960;
     var firstY = startY - totalH / 2 + lh / 2;
 
     ctx.fillStyle = 'rgba(255,255,255,0.03)';
@@ -283,7 +287,7 @@
   /* ── swipe ── */
 
   function isOnBtn(el) {
-    while (el) { if (el.tagName === 'BUTTON') return true; el = el.parentElement; }
+    while (el) { if (el.tagName === 'BUTTON' || el.tagName === 'A') return true; el = el.parentElement; }
     return false;
   }
 
@@ -302,7 +306,7 @@
     var dx = ex - swipe.x;
     var dy = ey - swipe.y;
     if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) {
-      goNext();
+      if (ex < window.innerWidth / 2) { goPrev(); } else { goNext(); }
     } else if (dx > 0) {
       goPrev();
     } else {
@@ -381,7 +385,7 @@
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('service-worker.js').catch(function () {});
+      navigator.serviceWorker.register('sw.js').catch(function () {});
     });
   }
 })();

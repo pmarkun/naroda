@@ -16,7 +16,7 @@ categorias = {
     'Especiais': [],
 }
 
-with open('base.csv', 'r', encoding='utf-8') as f:
+with open('assets/base.csv', 'r', encoding='utf-8') as f:
     reader = csv.reader(f)
     header = next(reader)
     for row in reader:
@@ -45,7 +45,7 @@ with open('base.csv', 'r', encoding='utf-8') as f:
 
 output = [{'tema': k, 'perguntas': v} for k, v in categorias.items() if v]
 
-with open('questions.json', 'w', encoding='utf-8') as f:
+with open('data/questions.json', 'w', encoding='utf-8') as f:
     json.dump(output, f, ensure_ascii=False, indent=2)
 
 print(f'Total: {sum(len(t["perguntas"]) for t in output)} perguntas em {len(output)} categorias\n')

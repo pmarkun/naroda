@@ -3,36 +3,21 @@
 Um baralho digital de perguntas para conversas significativas.
 Versão PWA para celular — adicione na tela de início e use offline.
 
-## Sobre o Baralho
+## Como Jogar
 
-Esse projeto nasce para que as pessoas se vejam e sejam vistos, para que rodas
-tragam força ao coletivo construído através da singularidade de cada um.
+Leia a pergunta em voz alta. Responda.
 
-Acreditamos que boas perguntas têm a potência de provocar, despertar e conectar.
-Esse baralho tem a intenção de acabar com as conversas banais, numa forma de
-manifesto contra a rotina de encontros rasos.
-
-Queremos celebrar o campo sutil, semear a vulnerabilidade, e ser ponte para a
-valorização da presença. Por mais espaços de confiança, conexões profundas e
-pelo hábito do afeto.
-
-### Ideal para
+## Onde Jogar
 
 - Refeições com amigos ou família
 - Encontros românticos
 - Papo de bar
 - Filas de espera
 - Viagens de carro, ônibus, avião, lhama
-- Filtrar pessoas em aplicativos de encontro
 - Lugares com pessoas
 - Lugares sem pessoas
 
-### Como Jogar
-
-O baralho traz 3 formas de jogar, mas também pode ser utilizado livre de regras.
-As regras estão sendo escritas — por enquanto, o melhor jeito é se jogar.
-
-## Sobre Quem Fez
+## Quem Criou
 
 O mundo incomoda o Gabriel e o Gabriel incomoda o mundo. E é por essa
 reciprocidade que ele preenche grande parte dos seus dias pensando em estruturas
@@ -45,14 +30,38 @@ ela é cheia de ideias femininas e feministas. Eventualmente sofre de uma súbit
 vontade de dar uma volta correndo no quarteirão. Ela usa de boas perguntas como
 processo de cura para si e para quem mais estiver próximo.
 
+[contato@naroda.app.br](mailto:contato@naroda.app.br)
+
+## Estrutura do projeto
+
+```
+├── index.html          # Entrada do PWA
+├── manifest.json       # Manifest PWA
+├── sw.js               # Service worker
+├── src/                # Código fonte
+│   ├── app.js
+│   ├── styles.css
+│   └── fonts.css
+├── data/               # Dados do baralho
+│   ├── questions.json
+│   └── about.json
+├── fonts/              # Fontes self-hosted (OFL)
+│   ├── Inter.woff2
+│   ├── PlayfairDisplay.woff2
+│   └── PlayfairDisplay-Italic.woff2
+├── icons/              # Ícones do PWA
+│   ├── icon-192.png
+│   ├── icon-512.png
+│   ├── apple-touch-icon.png
+│   └── logo_original.png
+└── assets/             # Arquivos fonte
+    └── base.csv
+```
+
 ## Como usar
 
 ```bash
-# Servir localmente
 python3 -m http.server 8080
-
-# Abrir no navegador
-open http://localhost:8080
 ```
 
 ## Publicar no GitHub Pages
