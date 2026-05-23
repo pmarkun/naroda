@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "br.app.naroda",
+        "sha256_cert_fingerprints": ["AA:34:22:77:D1:80:46:40:13:5F:40:84:E8:BE:13:6B:9C:6C:96:95:1E:BE:51:3B:AA:BC:FE:D6:81:F0:50:A9"]
+      }
+    }]
