@@ -6,10 +6,12 @@ const URLS = [
   './styles.css',
   './app.js',
   './questions.json',
+  './about.json',
   './manifest.json',
-  './icon.svg',
   './icon-192.png',
   './icon-512.png',
+  './apple-touch-icon.png',
+  './logo_original.png',
 ];
 
 self.addEventListener('install', function (event) {
