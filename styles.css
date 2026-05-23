@@ -220,6 +220,10 @@ body {
   pointer-events: none;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 .bot-btn svg {
   display: block;
 }
