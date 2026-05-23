@@ -215,6 +215,11 @@ body {
   transform: scale(0.92);
 }
 
+.bot-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .bot-btn svg {
   display: block;
 }

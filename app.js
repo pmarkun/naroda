@@ -80,6 +80,7 @@
     if (index < 0 || index >= questions.length) return;
     qIndex = index;
     content.textContent = questions[qIndex];
+    updateArrows();
   }
 
   /* ── about mode ── */
@@ -89,6 +90,7 @@
     aIndex = index;
     content.innerHTML = renderAbout(aIndex);
     updateDots();
+    updateArrows();
   }
 
   function renderAbout(idx) {
@@ -114,6 +116,16 @@
   function updateDots() {
     var dots = aboutDots.querySelectorAll('.frame-dot');
     dots.forEach(function (d, i) { d.classList.toggle('active', i === aIndex); });
+  }
+
+  function updateArrows() {
+    if (aboutMode) {
+      prevBtn.classList.toggle('hidden', aIndex <= 0);
+      nextBtn.classList.toggle('hidden', aIndex >= aboutPages.length - 1);
+    } else {
+      prevBtn.classList.toggle('hidden', qIndex <= 0);
+      nextBtn.classList.toggle('hidden', qIndex >= questions.length - 1);
+    }
   }
 
   function renderDots() {
@@ -150,7 +162,7 @@
     if (aboutMode) {
       if (aIndex < aboutPages.length - 1) {
         aIndex++;
-        fade(function () { content.innerHTML = renderAbout(aIndex); updateDots(); });
+        fade(function () { showA(aIndex); });
       } else {
         toggleMode();
       }
@@ -158,7 +170,7 @@
     }
     if (qIndex >= questions.length - 1) { toast('Última pergunta'); return; }
     qIndex++;
-    fade(function () { content.textContent = questions[qIndex]; });
+    fade(function () { showQ(qIndex); });
   }
 
   function goPrev() {
@@ -166,12 +178,12 @@
     if (aboutMode) {
       if (aIndex <= 0) return;
       aIndex--;
-      fade(function () { content.innerHTML = renderAbout(aIndex); updateDots(); });
+      fade(function () { showA(aIndex); });
       return;
     }
     if (qIndex <= 0) { toast('Primeira pergunta'); return; }
     qIndex--;
-    fade(function () { content.textContent = questions[qIndex]; });
+    fade(function () { showQ(qIndex); });
   }
 
   /* ── share ── */
