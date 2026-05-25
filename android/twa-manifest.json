@@ -1,5 +1,5 @@
 {
-  "packageId": "br.app.naroda",
+  "packageId": "com.arapy.naroda",
   "host": "naroda.app.br",
   "name": "Na Roda",
   "launcherName": "Na Roda",
@@ -13,15 +13,15 @@
   "backgroundColor": "#000000",
   "enableNotifications": false,
   "startUrl": "/",
-  "iconUrl": "https://raw.githubusercontent.com/pmarkun/naroda/main/icons/icon-512.png",
-  "maskableIconUrl": "https://raw.githubusercontent.com/pmarkun/naroda/main/icons/icon-512.png",
+  "iconUrl": "https://naroda.app.br/icons/icon-512.png",
+  "maskableIconUrl": "https://naroda.app.br/icons/icon-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "/home/markun/devel/experiments/naroda/naroda.keystore",
     "alias": "naroda"
   },
   "appVersionName": "1.0.0",
-  "appVersionCode": 1,
+  "appVersionCode": 2,
   "shortcuts": [],
   "generatorApp": "bubblewrap",
   "fallbackType": "customtabs",
